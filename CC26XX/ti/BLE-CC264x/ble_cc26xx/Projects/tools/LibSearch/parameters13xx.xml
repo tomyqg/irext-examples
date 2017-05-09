@@ -1,0 +1,85 @@
+<!--
+	Each Library is defined using:
+		name: 			Used for identification purposes and error messaging
+		searchpath: 	This is the path to find the opt and lib files relative the input path provided as arg to libSearch
+		outputnameadd:	This is a string that is appended to the end of the provided output name 
+						(ex. "_HCI_TL" with output name CC2640Stack.a provided as output, lib copied to CC2640Stack_HCI_TL.a)
+		matchconfig: 	Use either FlashROM or FlashOnly input to libsearch at end of lib name
+		parameterlist:	See Below:
+
+	Each parameter is defined through a tuple
+		define: 		This is the name of the variable that is defined in the config file - Usually with a "-D" prefix
+		assign: 		Possible assignments of defined variables
+			required:	Whether or not assignment is required for this variable
+			arg:		Potential assignment of variable (if required then user config file must match one arg)
+-->
+<libraries>
+	<library>
+		<name>Stack</name>
+		<searchpath>.\CC13xx\IAR\CC1350\bin</searchpath>
+		<outputnameadd></outputnameadd>
+		<matchconfig>1</matchconfig>
+		<parameterlist>
+			<parameter>
+				<define>HOST_CONFIG</define>
+				<assign>
+					<required>1</required>
+					<arg>PERIPHERAL_CFG</arg>
+					<arg>CENTRAL_CFG</arg>
+					<arg>OBSERVER_CFG</arg>
+					<arg>BROADCASTER_CFG</arg>
+					<arg>PERIPHERAL_CFG+CENTRAL_CFG</arg>
+					<arg>PERIPHERAL_CFG+OBSERVER_CFG</arg>
+					<arg>CENTRAL_CFG+BROADCASTER_CFG</arg>
+					<arg>BROADCASTER_CFG+OBSERVER_CFG</arg>
+				</assign>
+			</parameter>
+			<parameter>
+				<define>L2CAP_CO_CHANNELS</define>
+				<assign>
+					<required>0</required>
+				</assign>
+			</parameter>
+			<parameter>
+				<define>GATT_NO_SERVICE_CHANGED</define>
+				<assign>
+					<required>0</required>
+				</assign>
+			</parameter>
+			<parameter>
+				<define>CTRL_V41_CONFIG</define>
+				<assign>
+					<required>1</required>
+					<arg>PING_CFG+SLV_FEAT_EXCHG_CFG+CONN_PARAM_REQ_CFG+MST_SLV_CFG</arg>
+				</assign>
+			</parameter>
+		</parameterlist>
+	</library>
+	<library>
+		<name>HCI_TL</name>
+		<searchpath>.\CC26xx\IAR\Common\bin</searchpath>
+		<outputnameadd>_HCI_TL</outputnameadd>
+		<matchconfig>0</matchconfig>
+		<parameterlist>
+			<parameter>
+				<define>HCI_TL_FULL</define>
+				<assign>
+					<required>0</required>
+				</assign>
+			</parameter>
+			<parameter>
+				<define>HCI_TL_PTM</define>
+				<assign>
+					<required>0</required>
+				</assign>
+			</parameter>
+			<parameter>
+				<define>CTRL_V41_CONFIG</define>
+				<assign>
+					<required>1</required>
+					<arg>PING_CFG+SLV_FEAT_EXCHG_CFG+CONN_PARAM_REQ_CFG+MST_SLV_CFG</arg>
+				</assign>
+			</parameter>
+		</parameterlist>
+	</library>	
+</libraries>

@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">IRControl</string>
+    <string name="title_activity_main">IRControl</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Public UI -->
+    <string name="ptr_pull_to_refresh">Pull to refresh</string>
+    <string name="ptr_release_to_refresh">Release to refresh</string>
+    <string name="ptr_refreshing">Refreshing...</string>
+    <string name="ptr_last_updated">Updated: %1$s</string>
+
+    <!-- Main UI -->
+    <string name="create_new">Tap + to create new remote control</string>
+
+    <!-- Create New -->
+    <string name="default_category">TV</string>
+    <string name="button_save">Save</string>
+    <string name="button_cancel">Cancel</string>
+
+    <!-- Control panel -->
+    <string name="button_power">POWER</string>
+    <string name="button_back">BACK</string>
+    <string name="button_home">HOME</string>
+    <string name="button_menu">MENU</string>
+    <string name="button_up">UP</string>
+    <string name="button_down">DOWN</string>
+    <string name="button_left">LEFT</string>
+    <string name="button_right">RIGHT</string>
+    <string name="button_ok">OK</string>
+    <string name="button_plus">+</string>
+    <string name="button_minus">-</string>
+
+</resources>

@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">红外遥控</string>
+    <string name="title_activity_main">红外遥控</string>
+    <string name="action_settings">设置</string>
+
+    <!-- Public UI -->
+    <string name="ptr_pull_to_refresh">下拉刷新</string>
+    <string name="ptr_release_to_refresh">放开以刷新\r\n(本例程只读取前20个数据)</string>
+    <string name="ptr_refreshing">刷新...</string>
+    <string name="ptr_last_updated">已刷新: %1$s</string>
+
+    <!-- Main UI -->
+    <string name="create_new">点击 + 安装遥控</string>
+
+    <!-- Create New -->
+    <string name="default_category">电视机</string>
+    <string name="button_save">保存</string>
+    <string name="button_cancel">取消</string>
+
+    <!-- Control panel -->
+    <string name="button_power">电源</string>
+    <string name="button_back">返回</string>
+    <string name="button_home">主页</string>
+    <string name="button_menu">菜单</string>
+    <string name="button_up">上</string>
+    <string name="button_down">下</string>
+    <string name="button_left">左</string>
+    <string name="button_right">右</string>
+    <string name="button_ok">确定</string>
+    <string name="button_plus">+</string>
+    <string name="button_minus">-</string>
+
+</resources>

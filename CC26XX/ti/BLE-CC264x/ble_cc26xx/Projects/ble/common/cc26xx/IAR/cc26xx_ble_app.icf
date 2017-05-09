@@ -1,0 +1,169 @@
+/*******************************************************************************
+  Filename:       cc26xx_ble_app.icf
+  Revised:        $Date: 2014-03-25 14:18:47 -0700 (Tue, 25 Mar 2014) $
+  Revision:       $Revision: 37873 $
+
+  Description:    IAR ARM Linker Configuration File - BLE Application
+
+  Imported Symbols
+  Note: Linker defines are located in the IAR IDE project using --config_def
+        in Options->Linker->Extra Options.
+
+  CCxxxx:            Device Name (e.g. CC2650)
+
+  Exported Symbols
+  Note: Can be used as externs in C code.
+
+  STACK_TOP: Location of the top of RAM.
+
+  Copyright 2013-2014 Texas Instruments Incorporated. All rights reserved.
+
+  IMPORTANT: Your use of this Software is limited to those specific rights
+  granted under the terms of a software license agreement between the user
+  who downloaded the software, his/her employer (which must be your employer)
+  and Texas Instruments Incorporated (the "License").  You may not use this
+  Software unless you agree to abide by the terms of the License. The License
+  limits your use, and you acknowledge, that the Software may not be modified,
+  copied or distributed unless embedded on a Texas Instruments microcontroller
+  or used solely and exclusively in conjunction with a Texas Instruments radio
+  frequency transceiver, which is integrated into your product.  Other than for
+  the foregoing purpose, you may not use, reproduce, copy, prepare derivative
+  works of, modify, distribute, perform, display or sell this Software and/or
+  its documentation for any purpose.
+
+  YOU FURTHER ACKNOWLEDGE AND AGREE THAT THE SOFTWARE AND DOCUMENTATION ARE
+  PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+  INCLUDING WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY, TITLE,
+  NON-INFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT SHALL
+  TEXAS INSTRUMENTS OR ITS LICENSORS BE LIABLE OR OBLIGATED UNDER CONTRACT,
+  NEGLIGENCE, STRICT LIABILITY, CONTRIBUTION, BREACH OF WARRANTY, OR OTHER
+  LEGAL EQUITABLE THEORY ANY DIRECT OR INDIRECT DAMAGES OR EXPENSES
+  INCLUDING BUT NOT LIMITED TO ANY INCIDENTAL, SPECIAL, INDIRECT, PUNITIVE
+  OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST DATA, COST OF PROCUREMENT
+  OF SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
+  (INCLUDING BUT NOT LIMITED TO ANY DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
+
+  Should you have any questions regarding your right to use this Software,
+  contact Texas Instruments Incorporated at www.TI.com.
+*******************************************************************************/
+
+////////////////////////////////////////////////////////////////////////////////
+// Memory Sizes
+////////////////////////////////////////////////////////////////////////////////
+  define symbol RAM_SIZE            = 0x00005000;  // 20K
+  define symbol FLASH_SIZE          = 0x00020000;  // 128K
+  define symbol ROM_SIZE            = 0x0001C000;  // 115K
+
+////////////////////////////////////////////////////////////////////////////////
+// Memory Definitions
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// RAM
+//
+define symbol RAM_START           = 0x20000000;
+
+if ( isdefinedsymbol(ICALL_RAM0_ADDR) )
+{
+  define symbol RAM_END           = (ICALL_RAM0_ADDR-1);
+}
+else // default
+{
+  define symbol RAM_END           = 0x200027FF;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Flash
+//
+define symbol FLASH_START           = 0x00000000;
+
+if ( isdefinedsymbol(ICALL_STACK0_ADDR) )
+{
+  define symbol FLASH_END           = (ICALL_STACK0_ADDR-1);
+}
+else // default
+{
+  define symbol FLASH_END           = 0x00007FFF;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Stack
+//
+
+define symbol STACK_SIZE           = 0x400;
+define symbol STACK_START          = RAM_END + 1;
+define symbol STACK_END            = STACK_START - STACK_SIZE;
+define block CSTACK with alignment = 8, size = STACK_SIZE { section .stack };
+//
+define symbol STACK_TOP            = RAM_END + 1;
+export symbol STACK_TOP;
+
+////////////////////////////////////////////////////////////////////////////////
+// Heap
+//
+
+define symbol HEAP_SIZE            = 0x1000;
+define block  HEAP with alignment  = 8, size = HEAP_SIZE { };
+
+////////////////////////////////////////////////////////////////////////////////
+// Flash Interrupt Vector Table
+//
+
+define symbol INTVEC_NUM_ENTRIES   = 50 + 1; // first entry is stack location
+define symbol INTVEC_SIZE          = INTVEC_NUM_ENTRIES + 4;
+
+////////////////////////////////////////////////////////////////////////////////
+// Memory Regions
+////////////////////////////////////////////////////////////////////////////////
+
+define memory mem with size = 4G;
+
+define region RAM             = mem:[from RAM_START   to RAM_END];
+define region FLASH_LAST_PAGE = mem:[from(FLASH_SIZE) - 0x1000 to FLASH_SIZE-1];
+define region FLASH           = mem:[from FLASH_START to FLASH_END]
+                                | FLASH_LAST_PAGE;
+
+////////////////////////////////////////////////////////////////////////////////
+// Memory Placement
+////////////////////////////////////////////////////////////////////////////////
+
+// CCFG
+place at end of FLASH_LAST_PAGE { readonly section .ccfg };
+keep { section .ccfg };
+
+// Interrupt Vector Table
+place at address mem:FLASH_START { readonly section .intvec };
+keep                             { readonly section .intvec };
+
+// RAM Vector Table
+place at start of RAM { section .vtable_ram };
+
+// Stack
+place at end of RAM { block CSTACK };
+
+// Heap
+place in RAM { block HEAP };
+
+place in FLASH { readonly };
+place in RAM   { readwrite };
+
+////////////////////////////////////////////////////////////////////////////////
+// Initialization
+////////////////////////////////////////////////////////////////////////////////
+
+initialize by copy { readwrite };
+
+do not initialize
+{
+  section .noinit,
+  section .stack,
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// The USE_TIRTOS_ROM symbol is defined internally in the build flow (using
+// --config_def USE_TIRTOS_ROM=1) for TI-RTOS applications whose appBLE.cfg file
+// specifies to use the ROM.
+//
+if (isdefinedsymbol(USE_TIRTOS_ROM)) {
+     include "TIRTOS_ROM.icf";
+}

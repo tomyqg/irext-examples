@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="net.irext.ircontrol">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.TRANSMIT_IR"/>
+    <uses-feature android:name="android.hardware.ConsumerIrManager"/>
+
+    <application
+            android:name=".IRApplication"
+            android:allowBackup="true"
+            android:icon="@mipmap/ir_logo"
+            android:label="@string/app_name"
+            android:supportsRtl="true"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar">
+
+        <activity
+                android:name=".ui.activity.MainActivity"
+                android:label="@string/title_activity_main"
+                android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+                android:name=".ui.activity.CreateActivity"
+                android:parentActivityName="android.support.v4.app.FragmentActivity"
+                android:theme="@style/AppTheme">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="android.support.v4.app.FragmentActivity"/>
+        </activity>
+
+        <activity
+                android:name=".ui.activity.ControlActivity"
+                android:parentActivityName="android.support.v4.app.FragmentActivity"
+                android:theme="@style/AppTheme">
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value="android.support.v4.app.FragmentActivity"/>
+        </activity>
+
+        <meta-data
+                android:name="AA_DB_NAME"
+                android:value="IRRemote"/>
+        <meta-data
+                android:name="AA_DB_VERSION"
+                android:value="5"/>
+        <meta-data
+                android:name="AA_MODELS"
+                android:value="net.irext.ircontrol.bean.RemoteControl"/>
+
+
+    </application>
+
+</manifest>

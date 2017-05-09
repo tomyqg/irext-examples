@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource.explorer version="1.0" name="BLE-Stack for SimpleLink wireless MCUs" dir="./../../../../ble/" href="http://www.ti.com/lsds/ti/wireless_connectivity/bluetooth_bluetooth-ble/overview.page">
+    <contents name="CC2640F128" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+		<contents name="Documentation">
+			<content name="Documents" href="./../../Documents">
+				<type>folder</type>
+			</content>
+			<content name="Bluetooth Smart Wiki" href="http://www.ti.com/ble-wiki">
+				<type>weblink</type>
+			</content>
+		</contents>
+		<content name="Download Bluetooth Smart SDK" href="http://www.ti.com/tool/ble-stack">
+			<type>weblink</type>
+		</content>
+		<content name="E2E Forum" href="http://www.ti.com/ble-forum">
+			<type>weblink</type>
+		</content>
+		<contents name="Projects" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+			<filter id="TI">
+				<search.tags>
+					<tag>BLE</tag>
+					<tag>Bluetooth</tag>
+					<tag>Bluetooth low energy</tag>
+					<tag>Bluetooth Smart</tag>
+				</search.tags>
+				<topics>
+					<topic>Bluetooth</topic>
+				</topics>
+				<devices>
+					<device>CC2640</device>
+					<device>CC26xx</device>
+					<device>ARM</device>
+				</devices>
+			</filter>
+			<contents name="BIM External Flash" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="BIM_Ext" desc="BIM for External Flash OAD Project"
+						 href="./util/BIM_extflash/CC26xx/CCS">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Blood Pressure" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="BloodPressureApp" desc="Blood Pressure Application Project"
+						 href="./BloodPressure/CC26xx/CCS/BloodPressure">
+					<type>project</type>
+				</content>
+				<content name="BloodPressureStack" desc="Blood Pressure Stack Project"
+						 href="./BloodPressure/CC26xx/CCS/BloodPressureStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Cycling Sensor" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="CyclingSensorApp" desc="Cycling Sensor Application Project"
+						 href="./CyclingSensor/CC26xx/CCS/CyclingSensor">
+					<type>project</type>
+				</content>
+				<content name="CyclingSensorStack" desc="Cycling Sensor Stack Project"
+						 href="./CyclingSensor/CC26xx/CCS/CyclingSensorStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Glucose Collector" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="GlucoseCollectorApp" desc="Glucose Collector Application Project"
+						 href="./GlucoseCollector/CC26xx/CCS/GlucoseCollector">
+					<type>project</type>
+				</content>
+			    <content name="GlucoseCollectorStack" desc="Glucose Collector Stack Project"
+					     href="./GlucoseCollector/CC26xx/CCS/GlucoseCollectorStack">
+					<type>project</type>
+			    </content>
+			</contents>
+			<contents name="Glucose Sensor" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="GlucoseSensorApp" desc="Glucose Sensor Application Project"
+						 href="./GlucoseSensor/CC26xx/CCS/GlucoseSensor">
+					<type>project</type>
+				</content>
+				<content name="GlucoseSensorStack" desc="Glucose Sensor Stack Project"
+						 href="./GlucoseSensor/CC26xx/CCS/GlucoseSensorStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Heart Rate" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="HeartRateApp" desc="Heart Rate Application Project"
+						 href="./HeartRate/CC26xx/CCS/HeartRate">
+					<type>project</type>
+				</content>
+				<content name="HeartRateStack" desc="Heart Rate Stack Project"
+						 href="./HeartRate/CC26xx/CCS/HeartRateStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="HID Emulated Keyboard" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="HIDEmuKbdApp" desc="HID Emulated Keyboard Application Project"
+						 href="./HIDEmuKbd/CC26xx/CCS/HIDEmuKbd">
+					<type>project</type>
+				</content>
+				<content name="HIDEmuKbdStack" desc="HID Emulated Keyboard Stack Project"
+						 href="./HIDEmuKbd/CC26xx/CCS/HIDEmuKbdStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Host Test" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="HostTestApp" desc="Host Test Application Project"
+						 href="./HostTest/CC26xx/CCS/HostTest">
+					<type>project</type>
+				</content>
+				<content name="HostTestStack" desc="Host Test Stack Project"
+						 href="./HostTest/CC26xx/CCS/HostTestSTack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="KeyFob Demo" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="KeyFobApp" desc="KeyFob Emulator Application Project"
+						 href="./KeyFob/CC26xx/CCS/KeyFob">
+					<type>project</type>
+				</content>
+				<content name="KeyFobStack" desc="KeyFob Emulator Stack Project"
+						 href="./KeyFob/CC26xx/CCS/KeyFobStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="ProximityTag" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="ProximityTagApp" desc="Proximity Tag Application Project"
+						 href="./ProximityTag/CC26xx/CCS/ProximityTag">
+					<type>project</type>
+				</content>
+				<content name="ProximityTagStack" desc="Proximity Tag Stack Project"
+						 href="./ProximityTag/CC26xx/CCS/ProximityTagStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Running Sensor" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="RunningSensorApp" desc="Running Sensor Application Project"
+						 href="./RunningSensor/CC26xx/CCS/RunningSensor">
+					<type>project</type>
+				</content>
+				<content name="RunningSensorStack" desc="Running Sensor Stack Project"
+						 href="./RunningSensor/CC26xx/CCS/RunningSensorStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="SensorTag" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png"
+					  href="http://go-dsp.com/sensorTag/tearDown.html">
+				<content name="SensorTagApp" desc="SensorTag Application Project"
+						 href="./SensorTag/CC26xx/CCS/SensorTag">
+					<type>project</type>
+				</content>
+				<content name="SensorTagStack" desc="SensorTag Stack Project"
+						 href="./SensorTag/CC26xx/CCS/SensorTagStack">
+					<type>project</type>
+				</content>
+				<content name="SensorTag Quickstart Cloud" desc="View live sensor data"
+						 href="https://quickstart.internetofthings.ibmcloud.com">
+					<type>weblink</type>
+				</content>
+			</contents>
+			<contents name="Simple BLE Broadcaster" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SimpleBLEBroadcasterApp" desc="Simple BLE Broadcaster Application Project"
+						 href="./SimpleBLEBroadcaster/CC26xx/CCS/SimpleBLEBroadcaster">
+					<type>project</type>
+				</content>
+				<content name="SimpleBLEBroadcasterStack" desc="Simple BLE Broadcaster Stack Project"
+						 href="./SimpleBLEBroadcaster/CC26xx/CCS/SimpleBLEBroadcasterStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Simple BLE Central" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SimpleBLECentralApp" desc="Simple BLE Central Application Project"
+						 href="./SimpleBLECentral/CC26xx/CCS/SimpleBLECentral">
+					<type>project</type>
+				</content>
+				<content name="SimpleBLECentralStack" desc="Simple BLE Central Stack Project"
+						 href="./SimpleBLECentral/CC26xx/CCS/SimpleBLECentralStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Simple BLE Observer" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SimpleBLEObserverApp" desc="Simple BLE Observer Application Project"
+						 href="./SimpleBLEObserver/CC26xx/CCS/SimpleBLEObserver">
+					<type>project</type>
+				</content>
+				<content name="SimpleBLEObserverStack" desc="Simple BLE Observer Stack Project"
+						 href="./SimpleBLEObserver/CC26xx/CCS/SimpleBLEObserverStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Simple AP" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SAPLib" desc="Simple AP Host Library Project"
+						 href="./SAP/CC26xx/CCS">
+					<type>project</type>
+				</content>
+				<content name="SimpleAP" desc="Simple AP Sample Application Project"
+						 href="./SimpleAP/CC26xx/CCS/SimpleAP">
+					<type>project</type>
+				</content>
+			</contents>
+		    <contents name="Simple BLE Peripheral" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SimpleBLEPeripheralApp" desc="Simple BLE Peripheral Application Project"
+						 href="./SimpleBLEPeripheral/CC26xx/CCS/SimpleBLEPeripheral">
+					<type>project</type>
+				</content>
+				<content name="SimpleBLEPeripheralStack" desc="Simple BLE Peripheral Stack Project"
+						 href="./SimpleBLEPeripheral/CC26xx/CCS/SimpleBLEPeripheralStack">
+					<type>project</type>
+				</content>
+			</contents>
+		    <contents name="Simple NP" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SimpleNPApp" desc="Simple Network Processor Application Project"
+						 href="./SimpleNP/CC26xx/CCS/SimpleNP">
+					<type>project</type>
+				</content>
+				<content name="SimpleBLENPStack" desc="Simple Network Processor Stack Project"
+						 href="./SimpleNP/CC26xx/CCS/SimpleNPStack">
+					<type>project</type>
+				</content>
+			</contents>			
+			<contents name="Thermometer" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="ThermometerApp" desc="Thermometer Application Project"
+						 href="./Thermometer/CC26xx/CCS/Thermometer">
+					<type>project</type>
+				</content>
+				<content name="ThermometerStack" desc="Thermometer Stack Project"
+						 href="./Thermometer/CC26xx/CCS/ThermometerStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Time App" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="TimeApp" desc="Time Application Project"
+						 href="./TimeApp/CC26xx/CCS/TimeApp">
+					<type>project</type>
+				</content>
+				<content name="TimeAppStack" desc="Time Stack Project"
+						 href="./TimeApp/CC26xx/CCS/TimeAppStack">
+					<type>project</type>
+				</content>
+			</contents>
+		</contents>
+	</contents>
+	<contents name="CC1350F128" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+		<contents name="Projects" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+			<filter id="TI" >
+				<search.tags>
+					<tag>BLE</tag>
+					<tag>Bluetooth</tag>
+					<tag>Bluetooth low energy</tag>
+					<tag>Bluetooth Smart</tag>
+				</search.tags>
+				<topics>
+					<topic>Bluetooth</topic>
+				</topics>
+				<devices>
+					<device>CC1350</device>
+					<device>CC13xx</device>
+					<device>ARM</device>
+				</devices>
+			</filter>
+			<contents name="Dual Image Concept" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="BIM" desc="CC1350 BIM for Dual Image Concept"
+						 href="./util/BIM/CC13xx/CCS">
+					<type>project</type>
+				</content>			
+				<content name="DualImageConceptApp" desc="Dual Image Concept Application Project"
+						 href="./DualImageConcept/CC13xx/CCS/DualImageConcept">
+						<type>project</type>
+				</content>
+				<content name="DualImageConceptStack" desc="Dual Image Concept Stack Project"
+						 href="./DualImageConcept/CC13xx/CCS/DualImageConceptStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Host Test" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="HostTestApp" desc="Host Test Application Project"
+						 href="./HostTest/CC13xx/CCS/HostTest">
+					<type>project</type>
+				</content>
+				<content name="HostTestStack" desc="Host Test Stack Project"
+						 href="./HostTest/CC13xx/CCS/HostTestStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Simple BLE Central" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SimpleBLECentralApp" desc="Simple BLE Central Application Project"
+						 href="./SimpleBLECentral/CC13xx/CCS/SimpleBLECentral">
+					<type>project</type>
+				</content>
+				<content name="SimpleBLECentralStack" desc="Simple BLE Central Stack Project"
+						 href="./SimpleBLECentral/CC13xx/CCS/SimpleBLECentralStack">
+					<type>project</type>
+				</content>
+			</contents>
+			<contents name="Simple BLE Peripheral" icon="./../common/ResourceExplorer/ccs/ble/bluetooth_icon.png">
+				<content name="SimpleBLEPeripheralApp" desc="Simple BLE Peripheral Application Project"
+						 href="./SimpleBLEPeripheral/CC13xx/CCS/SimpleBLEPeripheral">
+					<type>project</type>
+				</content>
+				<content name="SimpleBLEPeripheralStack" desc="Simple BLE Peripheral Stack Project"
+						 href="./SimpleBLEPeripheral/CC13xx/CCS/SimpleBLEPeripheralStack">
+					<type>project</type>
+				</content>
+			</contents>
+		</contents>
+	</contents>
+</resource.explorer>
