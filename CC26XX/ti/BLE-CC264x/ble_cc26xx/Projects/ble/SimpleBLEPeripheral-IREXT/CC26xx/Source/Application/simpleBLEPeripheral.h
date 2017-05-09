@@ -53,7 +53,6 @@ extern "C"
 #define IR_KEY_VOL_UP   7
 #define IR_KEY_VOL_DOWN 8
 
-
 typedef enum
 {
     IR_TYPE_NONE = 0,
@@ -68,7 +67,6 @@ typedef enum
     IR_STATE_NONE,
     IR_STATE_READY,
     IR_STATE_OPENED,
-    IR_STATE_PARSED,
     IR_STATE_MAX
 } ir_state_t;
 

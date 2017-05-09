@@ -175,7 +175,8 @@ static void IRext_processState()
     {
         if (IR_TYPE_TV == dccb.ir_type)
         {
-            if (IR_DECODE_SUCCEEDED == ir_tv_lib_open(dccb.source_code, dccb.source_code_length))
+            if (IR_DECODE_SUCCEEDED ==
+                ir_binary_open(IR_CATEGORY_TV, 1, dccb.source_code, dccb.source_code_length))
             {
                 LCD_WRITE_STRING("IR OPENED", LCD_PAGE7);
                 HalLedSet(HAL_LED_1, HAL_LED_MODE_ON);
@@ -188,7 +189,8 @@ static void IRext_processState()
         }
         else if (IR_TYPE_AC == dccb.ir_type)
         {
-            if (IR_DECODE_SUCCEEDED == ir_ac_lib_open(dccb.source_code, dccb.source_code_length))
+            if (IR_DECODE_SUCCEEDED ==
+                ir_binary_open(IR_CATEGORY_AC, 1, dccb.source_code, dccb.source_code_length))
             {
                 LCD_WRITE_STRING("IR OPENED", LCD_PAGE7);
                 HalLedSet(HAL_LED_1, HAL_LED_MODE_ON);
@@ -206,41 +208,7 @@ static void IRext_processState()
     }
     else if (IR_STATE_OPENED == dccb.ir_state)
     {
-        if (IR_TYPE_TV == dccb.ir_type)
-        {
-            if (IR_DECODE_SUCCEEDED == ir_tv_lib_parse(0))
-            {
-                LCD_WRITE_STRING("IR PARSED", LCD_PAGE7);
-                HalLedSet(HAL_LED_2, HAL_LED_MODE_ON);
-                dccb.ir_state = IR_STATE_PARSED;
-            }
-            else
-            {
-                LCD_WRITE_STRING("PARSE TV ERROR", LCD_PAGE7);
-            }
-        }
-        else if (IR_TYPE_AC == dccb.ir_type)
-        {
-            if (IR_DECODE_SUCCEEDED == ir_ac_lib_parse())
-            {
-                LCD_WRITE_STRING("IR PARSED", LCD_PAGE7);
-                HalLedSet(HAL_LED_2, HAL_LED_MODE_ON);
-                dccb.ir_state = IR_STATE_PARSED;
-            }
-            else
-            {
-                LCD_WRITE_STRING("PARSE AC ERROR", LCD_PAGE7);
-            }
-        }
-        else
-        {
-            LCD_WRITE_STRING("TYPE ERROR", LCD_PAGE7);
-        }
-    }
-    else if (IR_STATE_PARSED == dccb.ir_state)
-    {
-        if ((dccb.ir_type == IR_TYPE_TV && IR_DECODE_SUCCEEDED == ir_tv_lib_close()) ||
-            (dccb.ir_type == IR_TYPE_AC && IR_DECODE_SUCCEEDED == ir_ac_lib_close()))
+        if (IR_DECODE_SUCCEEDED == ir_close())
         {
             LCD_WRITE_STRING("IR READY", LCD_PAGE7);
             HalLedSet(HAL_LED_1 | HAL_LED_2,  HAL_LED_MODE_OFF);
@@ -252,15 +220,15 @@ static void IRext_processState()
 // KEY operation
 static void IRext_processKey(uint8_t ir_type, uint8_t ir_key, char* key_display)
 {
-    if (IR_STATE_PARSED == dccb.ir_state)
+    if (IR_STATE_OPENED == dccb.ir_state)
     {
         if (IR_TYPE_TV == dccb.ir_type)
         {
-            dccb.decoded_length = ir_tv_lib_control(ir_key, dccb.ir_decoded);
+            dccb.decoded_length = ir_decode(ir_key, dccb.ir_decoded, NULL, 0);
         }
         else if (IR_TYPE_AC == dccb.ir_type)
         {
-            dccb.decoded_length = ir_ac_lib_control(ac_status, dccb.ir_decoded, ir_key, 0);
+            dccb.decoded_length = ir_decode(ir_key, dccb.ir_decoded, &ac_status, 0);
         }
         else
         {
@@ -387,7 +355,7 @@ static void ParseCommand(uint8_t* data, uint16_t len)
     uint8 key_code = 0;
     uint8 ac_function = 0;
 
-    if (IR_STATE_PARSED != dccb.ir_state)
+    if (IR_STATE_OPENED != dccb.ir_state)
     {
         // feek back error state
         WriteBytes("11", 2);
@@ -400,12 +368,12 @@ static void ParseCommand(uint8_t* data, uint16_t len)
     {
         // decode as TV
         key_code = data[1] - 0x30;
-        dccb.decoded_length = ir_tv_lib_control(key_code, dccb.ir_decoded);
+        dccb.decoded_length = ir_decode(key_code, dccb.ir_decoded, NULL, 0);
     }
     else if (IR_TYPE_AC == dccb.ir_type && 0x32 == ir_type)
     {
         ac_function = data[1] - 0x30;
-        dccb.decoded_length = ir_ac_lib_control(ac_status, dccb.ir_decoded, ac_function, 0);
+        dccb.decoded_length = ir_decode(ac_function, dccb.ir_decoded, &ac_status, 0);
     }
 
     if (dccb.decoded_length > 0)

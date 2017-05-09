@@ -21,11 +21,11 @@ extern struct tag_head *tags;
 
 UINT8 tag_count = 0;
 const UINT16 tag_index[TAG_COUNT_FOR_PROTOCOL] =
-        {
-                1, 2, 3, 4, 5, 6, 7,
-                21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
-                41, 42, 43, 44, 45, 46, 47, 48
-        };
+{
+    1, 2, 3, 4, 5, 6, 7,
+    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+    41, 42, 43, 44, 45, 46, 47, 48
+};
 
 INT8 binary_parse_offset()
 {
@@ -50,6 +50,7 @@ INT8 binary_parse_offset()
     {
         tags[i].tag = tag_index[i];
         tags[i].offset = *(phead + i);
+
         if (tags[i].offset == TAG_INVALID)
         {
             tags[i].len = 0;

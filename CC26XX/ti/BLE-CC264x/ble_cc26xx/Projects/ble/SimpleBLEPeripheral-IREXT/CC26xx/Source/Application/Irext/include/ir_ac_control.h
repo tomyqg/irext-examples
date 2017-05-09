@@ -22,6 +22,7 @@ extern "C"
 #define TAG_COUNT_FOR_PROTOCOL       29
 
 #define TAG_INVALID                  0xffff
+
 #define MAX_DELAYCODE_NUM            16
 #define MAX_BITNUM                   16
 
@@ -368,11 +369,11 @@ struct ir_bin_buffer
 
 typedef struct REMOTE_AC_STATUS
 {
-    UINT8 acPower;
-    UINT8 acTemp;
-    UINT8 acMode;
-    UINT8 acWindDir;
-    UINT8 acWindSpeed;
+    ac_power acPower;
+    ac_temperature acTemp;
+    ac_mode acMode;
+    ac_swing acWindDir;
+    ac_wind_speed acWindSpeed;
     UINT8 acDisplay;
     UINT8 acSleep;
     UINT8 acTimer;
