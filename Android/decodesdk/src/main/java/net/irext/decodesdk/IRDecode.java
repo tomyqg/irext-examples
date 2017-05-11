@@ -22,11 +22,11 @@ public class IRDecode {
         System.loadLibrary("irdecode");
     }
 
-    private native int irACLibOpen(String fileName);
+    private native int irOpen(int category, int subCate, String fileName);
 
-    private native int[] irACControl(ACStatus acStatus, int functionCode);
+    private native int[] irDecode(int keyCode, ACStatus acStatus, int changeWindDirection);
 
-    private native void irACLibClose();
+    private native void irClose();
 
     private native TemperatureRange irACGetTemperatureRange(int acMode);
 
@@ -35,12 +35,6 @@ public class IRDecode {
     private native int irACGetSupportedWindSpeed(int acMode);
 
     private native int irACGetSupportedSwing(int acMode);
-
-    private native int irTVLibOpen(String fileName, int irHexEncode);
-
-    private native int[] irTVControl(int key_number);
-
-    private native void irTVLibClose();
 
     private static IRDecode mInstance;
 
@@ -51,16 +45,16 @@ public class IRDecode {
         return mInstance;
     }
 
-    public int openACBinary(String fileName) {
-        return irACLibOpen(fileName);
+    public int openBinary(int category, int subCate, String fileName) {
+        return irOpen(category, subCate, fileName);
     }
 
-    public int[] decodeACBinary(ACStatus acStatus, int functionCode) {
-        return irACControl(acStatus, functionCode);
+    public int[] decodeBinary(int keyCode, ACStatus acStatus, int changeWindDir) {
+        return irDecode(keyCode, acStatus, changeWindDir);
     }
 
-    public void closeACBinary() {
-        irACLibClose();
+    public void closeBinary() {
+        irClose();
     }
 
     public TemperatureRange getTemperatureRange(int acMode) {
@@ -71,7 +65,8 @@ public class IRDecode {
         // cool, heat, auto, fan, de-humidification
         int []retSupportedMode = {0, 0, 0, 0, 0};
         int supportedMode = irACGetSupportedMode();
-        for (int i = Constants.ACMode.MODE_COOL.getValue(); i <= Constants.ACMode.MODE_DEHUMIDITY.getValue(); i++) {
+        for (int i = Constants.ACMode.MODE_COOL.getValue(); i <=
+                Constants.ACMode.MODE_DEHUMIDITY.getValue(); i++) {
             retSupportedMode[i] = (supportedMode >>> 1) & 1;
         }
         return retSupportedMode;
@@ -99,21 +94,5 @@ public class IRDecode {
             retSupportedSwing[i] = (supportedSwing >>> 1) & 1;
         }
         return retSupportedSwing;
-    }
-
-    public int openTVBinary(String fileName, int subCategory) {
-        int isHexType = 0;
-        if (2 == subCategory) {
-            isHexType = 1;
-        }
-        return irTVLibOpen(fileName, isHexType);
-    }
-
-    public int[] decodeTVBinary(int keyCode) {
-        return irTVControl(keyCode);
-    }
-
-    public void closeTVBinary() {
-        irTVLibClose();
     }
 }
