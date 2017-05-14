@@ -16,7 +16,6 @@ import net.irext.ircontrol.ui.activity.CreateActivity;
 import net.irext.ircontrol.ui.adapter.CityAdapter;
 import net.irext.ircontrol.ui.adapter.OperatorAdapter;
 import net.irext.ircontrol.utils.MessageUtil;
-import net.irext.webapi.WebAPIs;
 import net.irext.webapi.model.City;
 import net.irext.webapi.model.StbOperator;
 

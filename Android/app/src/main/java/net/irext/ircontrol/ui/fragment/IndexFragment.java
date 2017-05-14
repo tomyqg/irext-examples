@@ -67,12 +67,12 @@ public class IndexFragment extends BaseCreateFragment {
                 City city = mParent.getCurrentCity();
                 StbOperator operator = mParent.getCurrentOperator();
 
-                int brandID = 0;
+                int brandId = 0;
                 String cityCode = null;
-                String operatorID = null;
+                String operatorId = null;
 
                 if (null != brand) {
-                    brandID = brand.getId();
+                    brandId = brand.getId();
                 }
 
                 if (null != city) {
@@ -80,11 +80,11 @@ public class IndexFragment extends BaseCreateFragment {
                 }
 
                 if (null != operator) {
-                    operatorID = operator.getOperator_id();
+                    operatorId = operator.getOperatorId();
                 }
 
-                mIndexes = mApp.mWeAPIs.listRemoteIndexes(mParent.getCurrentCategory().getId(),  brandID,
-                                cityCode, operatorID);
+                mIndexes = mApp.mWeAPIs.listRemoteIndexes(mParent.getCurrentCategory().getId(),  brandId,
+                                cityCode, operatorId);
                 if (null == mIndexes) {
                     mIndexes = new ArrayList<>();
                 }
@@ -97,22 +97,26 @@ public class IndexFragment extends BaseCreateFragment {
         new Thread() {
             @Override
             public void run() {
-                String remoteMap = mCurrentIndex.getRemoteMap();
-                int indexID = mCurrentIndex.getId();
-                InputStream in = mApp.mWeAPIs.downloadBin(remoteMap, indexID);
-                if (createDirectory()) {
-                    File binFile = new File(FileUtils.BIN_PATH +
-                            FileUtils.FILE_NAME_PREFIX + mCurrentIndex.getRemoteMap() +
-                            FileUtils.FILE_NAME_EXT);
-                    FileUtils.write(binFile, in);
-                } else {
-                    Log.w(TAG, "no directory to contain bin file");
-                }
+                try {
+                    String remoteMap = mCurrentIndex.getRemoteMap();
+                    int indexId = mCurrentIndex.getId();
+                    InputStream in = mApp.mWeAPIs.downloadBin(remoteMap, indexId);
+                    if (createDirectory()) {
+                        File binFile = new File(FileUtils.BIN_PATH +
+                                FileUtils.FILE_NAME_PREFIX + mCurrentIndex.getRemoteMap() +
+                                FileUtils.FILE_NAME_EXT);
+                        FileUtils.write(binFile, in);
+                    } else {
+                        Log.w(TAG, "no directory to contain bin file");
+                    }
 
-                if (null != in) {
-                    MessageUtil.postMessage(mMsgHandler, CMD_SAVE_REMOTE_CONTROL);
-                } else {
-                    Log.e(TAG, "bin file download failed");
+                    if (null != in) {
+                        MessageUtil.postMessage(mMsgHandler, CMD_SAVE_REMOTE_CONTROL);
+                    } else {
+                        Log.e(TAG, "bin file download failed");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }.start();
@@ -120,18 +124,21 @@ public class IndexFragment extends BaseCreateFragment {
 
     private boolean createDirectory() {
         File file = new File(FileUtils.BIN_PATH);
+        if (file.exists()) {
+            return true;
+        }
         return file.mkdirs();
     }
 
     private void saveRemoteControl() {
         RemoteControl remoteControl = new RemoteControl();
-        remoteControl.setCategoryID(mCurrentIndex.getCategoryId());
+        remoteControl.setCategoryId(mCurrentIndex.getCategoryId());
         remoteControl.setCategoryName(mCurrentIndex.getCategoryName());
-        remoteControl.setBrandID(mCurrentIndex.getBrandId());
+        remoteControl.setBrandId(mCurrentIndex.getBrandId());
         remoteControl.setBrandName(mCurrentIndex.getBrandName());
         remoteControl.setCityCode(mCurrentIndex.getCityCode());
         remoteControl.setCityName(mCurrentIndex.getCityName());
-        remoteControl.setOperatorID(mCurrentIndex.getOperatorId());
+        remoteControl.setOperatorId(mCurrentIndex.getOperatorId());
         remoteControl.setOperatorName(mCurrentIndex.getOperatorName());
         remoteControl.setProtocol(mCurrentIndex.getProtocol());
         remoteControl.setRemote(mCurrentIndex.getRemote());
@@ -139,7 +146,6 @@ public class IndexFragment extends BaseCreateFragment {
         remoteControl.setSubCategory(mCurrentIndex.getSubCate());
 
         long id = RemoteControl.createRemoteControl(remoteControl);
-        Log.d(TAG, "remote control has been saved: " + id);
         mParent.finish();
     }
 
@@ -197,7 +203,6 @@ public class IndexFragment extends BaseCreateFragment {
         @Override
         public void handleMessage(Message msg) {
             int cmd = msg.getData().getInt(MessageUtil.KEY_CMD);
-            Log.d(TAG, "handle message " + Integer.toString(cmd));
 
             IndexFragment indexFragment = mIndexFragment.get();
             switch (cmd) {

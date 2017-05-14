@@ -65,7 +65,7 @@ public class OperatorAdapter extends BaseAdapter {
         } else {
             holder = (ViewHolder)convertView.getTag();
         }
-        holder.textView.setText(mOperators.get(position).getOperator_name());
+        holder.textView.setText(mOperators.get(position).getOperatorName());
         return convertView;
     }
 

@@ -68,7 +68,7 @@ public class RemoteControlAdapter extends BaseAdapter {
         }
         RemoteControl remoteControl = mRemoteControls.get(position);
         String remoteName;
-        if (Constants.CategoryID.STB.getValue() != remoteControl.getCategoryID()) {
+        if (Constants.CategoryID.STB.getValue() != remoteControl.getCategoryId()) {
             remoteName = remoteControl.getCategoryName() + "-" + remoteControl.getBrandName();
         } else {
             remoteName = remoteControl.getCityName() + "-" + remoteControl.getOperatorName();

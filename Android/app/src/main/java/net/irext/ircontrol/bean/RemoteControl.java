@@ -22,13 +22,13 @@ import java.util.List;
 public class RemoteControl extends Model {
 
     @Column(name = "CategoryID")
-    private int categoryID;
+    private int categoryId;
 
     @Column(name = "CategoryName")
     private String categoryName;
 
     @Column(name = "BrandID")
-    private int brandID;
+    private int brandId;
 
     @Column(name = "BrandName")
     private String brandName;
@@ -40,7 +40,7 @@ public class RemoteControl extends Model {
     private String cityName;
 
     @Column(name = "OperatorID")
-    private String operatorID;
+    private String operatorId;
 
     @Column(name = "OperatorName")
     private String operatorName;
@@ -57,12 +57,12 @@ public class RemoteControl extends Model {
     @Column(name = "SubCategory")
     private int subCategory;
 
-    public int getCategoryID() {
-        return categoryID;
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategoryID(int categoryID) {
-        this.categoryID = categoryID;
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getCategoryName() {
@@ -73,12 +73,12 @@ public class RemoteControl extends Model {
         this.categoryName = categoryName;
     }
 
-    public int getBrandID() {
-        return brandID;
+    public int getBrandId() {
+        return brandId;
     }
 
-    public void setBrandID(int brandID) {
-        this.brandID = brandID;
+    public void setBrandId(int brandId) {
+        this.brandId = brandId;
     }
 
     public String getBrandName() {
@@ -105,12 +105,12 @@ public class RemoteControl extends Model {
         this.cityName = cityName;
     }
 
-    public String getOperatorID() {
-        return operatorID;
+    public String getOperatorId() {
+        return operatorId;
     }
 
-    public void setOperatorID(String operatorID) {
-        this.operatorID = operatorID;
+    public void setOperatorId(String operatorId) {
+        this.operatorId = operatorId;
     }
 
     public String getOperatorName() {
@@ -157,16 +157,16 @@ public class RemoteControl extends Model {
         return super.getId();
     }
 
-    public RemoteControl(int categoryID, String categoryName, int brandID, String brandName,
-                         String cityCode, String cityName, String operatorID, String operatorName,
+    public RemoteControl(int categoryId, String categoryName, int brandId, String brandName,
+                         String cityCode, String cityName, String operatorId, String operatorName,
                          String remote, String protocol, String remoteMap, int subCategory) {
-        this.categoryID = categoryID;
+        this.categoryId = categoryId;
         this.categoryName = categoryName;
-        this.brandID = brandID;
+        this.brandId = brandId;
         this.brandName = brandName;
         this.cityCode = cityCode;
         this.cityName = cityName;
-        this.operatorID = operatorID;
+        this.operatorId = operatorId;
         this.operatorName = operatorName;
         this.remote = remote;
         this.protocol = protocol;

@@ -1,18 +1,12 @@
 package net.irext.ircontrol.ui.activity;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import net.irext.ircontrol.R;
 import net.irext.ircontrol.ui.fragment.ControlFragment;
-import net.irext.ircontrol.utils.MessageUtil;
-
-import java.lang.ref.WeakReference;
 
 /**
  * Filename:       ControlActivity.java
@@ -26,11 +20,10 @@ import java.lang.ref.WeakReference;
  */
 public class ControlActivity extends AppCompatActivity {
 
+    @SuppressWarnings("unused")
     private static final String TAG = ControlActivity.class.getSimpleName();
 
     public static final String KEY_REMOTE_ID = "KEY_REMOTE_ID";
-
-    private MsgHandler mMsgHandler;
 
     private ControlFragment mFragment;
 
@@ -38,8 +31,6 @@ public class ControlActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control);
-
-        mMsgHandler = new MsgHandler(this);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
 
@@ -67,27 +58,5 @@ public class ControlActivity extends AppCompatActivity {
             mFragment.closeIRBinary();
         }
         super.onStop();
-    }
-
-    private static class MsgHandler extends Handler {
-
-        WeakReference<ControlActivity> mControlActivity;
-
-        MsgHandler(ControlActivity activity) {
-            mControlActivity = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            int cmd = msg.getData().getInt(MessageUtil.KEY_CMD);
-            Log.d(TAG, "handle message " + Integer.toString(cmd));
-
-            ControlActivity controlActivity = mControlActivity.get();
-            switch (cmd) {
-
-                default:
-                    break;
-            }
-        }
     }
 }

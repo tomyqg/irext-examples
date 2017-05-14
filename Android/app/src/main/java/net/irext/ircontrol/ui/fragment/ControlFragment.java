@@ -23,7 +23,6 @@ import net.irext.ircontrol.ui.activity.ControlActivity;
 import net.irext.ircontrol.utils.FileUtils;
 import net.irext.ircontrol.utils.MessageUtil;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 
 /**
@@ -130,42 +129,26 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
     private void showRemote() {
         mCurrentRemoteControl = RemoteControl.getRemoteControl(mRemoteID);
         if (null != mCurrentRemoteControl) {
-            Log.d(TAG, "current remote control = " + mCurrentRemoteControl.getRemoteMap());
-            int category = mCurrentRemoteControl.getCategoryID();
-            int ret = 0;
+            int category = mCurrentRemoteControl.getCategoryId();
             String binFileName = FileUtils.BIN_PATH + FileUtils.FILE_NAME_PREFIX +
                     mCurrentRemoteControl.getRemoteMap() + FileUtils.FILE_NAME_EXT;
 
-            if (Constants.CategoryID.AIR_CONDITIONER.getValue() == category) {
-
-                /* decode SDK - load AC binary file */
-                ret = mIRDecode.openACBinary(binFileName);
-            } else {
-
-                /* decode SDK - load TV binary file */
-                ret = mIRDecode.openTVBinary(binFileName, mCurrentRemoteControl.getSubCategory());
-            }
-
-            Log.d(TAG, "open binary result = " + ret);
+            /* decode SDK - load binary file */
+            // int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(), binFileName);
+            // Log.d(TAG, "open binary result = " + ret);
         }
     }
 
     public void closeIRBinary() {
-        int category = mCurrentRemoteControl.getCategoryID();
-        if (Constants.CategoryID.AIR_CONDITIONER.getValue() == category) {
-            mIRDecode.closeACBinary();
-        } else {
-            mIRDecode.closeTVBinary();
-        }
+        // mIRDecode.closeBinary();
     }
 
     @Nullable
     private int[] irControl(int keyCode) {
-
+        int inputKeyCode;
+        ACStatus acStatus = new ACStatus();
         /* decode SDK - decode according to key code */
-        if (Constants.CategoryID.AIR_CONDITIONER.getValue() == mCurrentRemoteControl.getCategoryID()) {
-            int acFunction;
-            ACStatus acStatus = new ACStatus();
+        if (Constants.CategoryID.AIR_CONDITIONER.getValue() == mCurrentRemoteControl.getCategoryId()) {
             acStatus.setAcPower(Constants.ACPower.POWER_OFF.getValue());
             acStatus.setAcMode(Constants.ACMode.MODE_COOL.getValue());
             acStatus.setAcTemp(Constants.ACTemperature.TEMP_24.getValue());
@@ -178,40 +161,46 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
             switch(keyCode) {
                 case KEY_POWER:
                     // power key --> change power
-                    acFunction = Constants.ACFunction.FUNCTION_SWITCH_POWER.getValue();
+                    inputKeyCode = Constants.ACFunction.FUNCTION_SWITCH_POWER.getValue();
                     break;
                 case KEY_UP:
                     // up key --> change wind speed
-                    acFunction = Constants.ACFunction.FUNCTION_SWITCH_WIND_SPEED.getValue();
+                    inputKeyCode = Constants.ACFunction.FUNCTION_SWITCH_WIND_SPEED.getValue();
                     break;
                 case KEY_DOWN:
                     // down key --> change wind dir
-                    acFunction = Constants.ACFunction.FUNCTION_SWITCH_WIND_DIR.getValue();
+                    inputKeyCode = Constants.ACFunction.FUNCTION_SWITCH_WIND_DIR.getValue();
                     break;
                 case KEY_RIGHT:
                     // right key --> change mode
-                    acFunction = Constants.ACFunction.FUNCTION_CHANGE_MODE.getValue();
+                    inputKeyCode = Constants.ACFunction.FUNCTION_CHANGE_MODE.getValue();
                     break;
                 case KEY_OK:
                     // center key --> fix wind dir
-                    acFunction = Constants.ACFunction.FUNCTION_SWITCH_SWING.getValue();
+                    inputKeyCode = Constants.ACFunction.FUNCTION_SWITCH_SWING.getValue();
                     break;
                 case KEY_PLUS:
                     // plus key --> temp up
-                    acFunction = Constants.ACFunction.FUNCTION_TEMPERATURE_UP.getValue();
+                    inputKeyCode = Constants.ACFunction.FUNCTION_TEMPERATURE_UP.getValue();
                     break;
                 case KEY_MINUS:
                     // minus key --> temp down
-                    acFunction = Constants.ACFunction.FUNCTION_TEMPERATURE_DOWN.getValue();
+                    inputKeyCode = Constants.ACFunction.FUNCTION_TEMPERATURE_DOWN.getValue();
                     break;
 
                 default:
                     return null;
             }
-            return IRDecode.getInstance().decodeACBinary(acStatus, acFunction);
         } else {
-            return IRDecode.getInstance().decodeTVBinary(keyCode);
+            inputKeyCode = keyCode;
         }
+
+        /* decode SDK - decode from binary */
+        /* translate key code for AC according to the mapping above */
+        /* ac status is useless for decoding devices other than AC, it's an optional parameter */
+        /* change wind dir is an optional parameter, set to 0 as default */
+        // return mIRDecode.decodeBinary(inputKeyCode, acStatus, 0);
+        return null;
     }
 
     // control
@@ -265,7 +254,8 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
                 break;
         }
         // send decoded integer array to IR emitter
-        ConsumerIrManager irEmitter = (ConsumerIrManager) mParent.getSystemService(Context.CONSUMER_IR_SERVICE);
+        ConsumerIrManager irEmitter =
+                (ConsumerIrManager) mParent.getSystemService(Context.CONSUMER_IR_SERVICE);
         if (irEmitter.hasIrEmitter()) {
             irEmitter.transmit(38000, decoded);
         }
@@ -282,7 +272,6 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
         @Override
         public void handleMessage(Message msg) {
             int cmd = msg.getData().getInt(MessageUtil.KEY_CMD);
-            Log.d(TAG, "handle message " + Integer.toString(cmd));
 
             ControlFragment controlFragment = mMainFragment.get();
             switch (cmd) {

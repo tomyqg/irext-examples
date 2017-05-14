@@ -284,10 +284,10 @@ public class PullToRefreshListView extends ListView{
                 else {
                 	previousY = -1;
                 }
-                
+
                 // Remember where have we started
                 mScrollStartY = event.getY();
-                
+
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -296,7 +296,6 @@ public class PullToRefreshListView extends ListView{
                         case RELEASE_TO_REFRESH:
                             setState(State.REFRESHING);
                             bounceBackHeader();
-
                             break;
 
                         case PULL_TO_REFRESH:
