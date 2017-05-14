@@ -134,13 +134,12 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
                     mCurrentRemoteControl.getRemoteMap() + FileUtils.FILE_NAME_EXT;
 
             /* decode SDK - load binary file */
-            // int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(), binFileName);
-            // Log.d(TAG, "open binary result = " + ret);
+            int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(), binFileName);
         }
     }
 
     public void closeIRBinary() {
-        // mIRDecode.closeBinary();
+        mIRDecode.closeBinary();
     }
 
     @Nullable
@@ -199,8 +198,7 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
         /* translate key code for AC according to the mapping above */
         /* ac status is useless for decoding devices other than AC, it's an optional parameter */
         /* change wind dir is an optional parameter, set to 0 as default */
-        // return mIRDecode.decodeBinary(inputKeyCode, acStatus, 0);
-        return null;
+        return mIRDecode.decodeBinary(inputKeyCode, acStatus, 0);
     }
 
     // control
@@ -257,7 +255,9 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
         ConsumerIrManager irEmitter =
                 (ConsumerIrManager) mParent.getSystemService(Context.CONSUMER_IR_SERVICE);
         if (irEmitter.hasIrEmitter()) {
-            irEmitter.transmit(38000, decoded);
+            if (null != decoded && decoded.length > 0) {
+                irEmitter.transmit(38000, decoded);
+            }
         }
     }
 
