@@ -24,6 +24,8 @@ public class IRDecode {
 
     private native int irOpen(int category, int subCate, String fileName);
 
+    private native int irOpenBinary(int category, int subCate, byte[] binaries, int binLength);
+
     private native int[] irDecode(int keyCode, ACStatus acStatus, int changeWindDirection);
 
     private native void irClose();
@@ -45,8 +47,12 @@ public class IRDecode {
         return mInstance;
     }
 
-    public int openBinary(int category, int subCate, String fileName) {
+    public int openFile(int category, int subCate, String fileName) {
         return irOpen(category, subCate, fileName);
+    }
+
+    public int openBinary(int category, int subCate, byte[] binaries, int binLength) {
+        return irOpenBinary(category, subCate, binaries, binLength);
     }
 
     public int[] decodeBinary(int keyCode, ACStatus acStatus, int changeWindDir) {

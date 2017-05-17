@@ -23,6 +23,9 @@ import net.irext.ircontrol.ui.activity.ControlActivity;
 import net.irext.ircontrol.utils.FileUtils;
 import net.irext.ircontrol.utils.MessageUtil;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.lang.ref.WeakReference;
 
 /**
@@ -134,7 +137,21 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
                     mCurrentRemoteControl.getRemoteMap() + FileUtils.FILE_NAME_EXT;
 
             /* decode SDK - load binary file */
-            int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(), binFileName);
+            // int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(), binFileName);
+            File binFile = new File(binFileName);
+            byte []binaries = new byte[(int)binFile.length()];
+            try {
+                if (null != binFile) {
+                    FileInputStream fin = new FileInputStream(binFile);
+                    fin.read(binaries);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(),
+                    binaries, binaries.length);
+
+            Log.d(TAG, "binary opened : " + ret);
         }
     }
 
