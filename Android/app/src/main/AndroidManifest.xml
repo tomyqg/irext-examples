@@ -58,11 +58,11 @@
 
         <meta-data
                 android:name="irext_app_key"
-                android:value="2841eeac09567f3394f051f8" />
+                android:value="c49c3bd5ff6b3efb67d8af2c" />
 
         <meta-data
             android:name="irext_app_secret"
-            android:value="65c0afc9d61feef012eb7dac" />
+            android:value="194f9cb578c458ace2284f16" />
 
     </application>
 

@@ -137,7 +137,7 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
                     mCurrentRemoteControl.getRemoteMap() + FileUtils.FILE_NAME_EXT;
 
             /* decode SDK - load binary file */
-            // int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(), binFileName);
+            int ret = mIRDecode.openFile(category, mCurrentRemoteControl.getSubCategory(), binFileName);
             File binFile = new File(binFileName);
             byte []binaries = new byte[(int)binFile.length()];
             try {
@@ -148,9 +148,6 @@ public class ControlFragment extends Fragment implements View.OnClickListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            int ret = mIRDecode.openBinary(category, mCurrentRemoteControl.getSubCategory(),
-                    binaries, binaries.length);
-
             Log.d(TAG, "binary opened : " + ret);
         }
     }
