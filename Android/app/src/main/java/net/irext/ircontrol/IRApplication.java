@@ -5,7 +5,7 @@ import android.util.Log;
 import com.activeandroid.ActiveAndroid;
 
 import net.irext.webapi.WebAPIs;
-import net.irext.webapi.model.Admin;
+import net.irext.webapi.model.UserApp;
 
 /**
  * Filename:       IRApplication.java
@@ -21,15 +21,16 @@ public class IRApplication extends com.activeandroid.app.Application {
 
     private static final String TAG = IRApplication.class.getSimpleName();
 
-    private static final String ADDRESS = "http://irext.net:8080";
+    // private static final String ADDRESS = "http://irext.net:8080";
+    private static final String ADDRESS = "http://192.168.137.128:8080";
     private static final String APP_NAME = "/irext-server";
 
     public WebAPIs mWeAPIs = WebAPIs.getInstance(ADDRESS, APP_NAME);
 
-    private Admin mAdmin;
+    private UserApp mUserApp;
 
-    public Admin getAdmin() {
-        return mAdmin;
+    public UserApp getAdmin() {
+        return mUserApp;
     }
 
     @Override
@@ -43,8 +44,10 @@ public class IRApplication extends com.activeandroid.app.Application {
         new Thread() {
             @Override
             public void run() {
-                mAdmin = mWeAPIs.signIn("guest@irext.net", "irextguest");
-                Log.d(TAG, "signIn response : " + mAdmin.getId() + ", " + mAdmin.getToken());
+                mUserApp = mWeAPIs.signIn(IRApplication.this);
+                if (null != mUserApp) {
+                    Log.d(TAG, "signIn response : " + mUserApp.getId() + ", " + mUserApp.getToken());
+                }
             }
         }.start();
     }

@@ -1,1 +1,1 @@
-include ':app', ':decodesdk'
+include ':app', ':decodesdk', ':web-api'

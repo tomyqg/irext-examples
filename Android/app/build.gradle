@@ -41,5 +41,5 @@ dependencies {
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.michaelpardo:activeandroid:3.1.0-SNAPSHOT'
     compile project(':decodesdk')
-    compile files('libs/irext-web-api.jar')
+    compile project(':web-api')
 }
