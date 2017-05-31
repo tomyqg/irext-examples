@@ -115,6 +115,7 @@ static BOOL get_ir_protocol(UINT8 encode_type)
 
     /* cycles number */
     prot_cycles_num = pbuffer->data + pbuffer->offset;
+
     if (encode_type == 0)
     {
         cycles_num_size = 8;      /* "BOOT", "STOP", "SEP", "ONE", "ZERO", "FLIP", "TWO", "THREE" */
@@ -190,6 +191,7 @@ static void print_ir_time(ir_data_t *data, UINT8 key_index, UINT16 *ir_time)
 
     if (NULL == data || NULL == ir_time)
     {
+        ir_printf("data or ir_time is null\n");
         return;
     }
 
@@ -198,11 +200,13 @@ static void print_ir_time(ir_data_t *data, UINT8 key_index, UINT16 *ir_time)
 
     if (prot_cycles_num[IRDA_ONE] != 1 || prot_cycles_num[IRDA_ZERO] != 1)
     {
+        ir_printf("logical 1 or 0 is invalid\n");
         return;
     }
 
     if (time_index >= USER_DATA_SIZE)
     {
+        ir_printf("time index exceeded\n");
         return;
     }
 
@@ -210,12 +214,14 @@ static void print_ir_time(ir_data_t *data, UINT8 key_index, UINT16 *ir_time)
     {
         if (pcycles == NULL)
         {
+            ir_printf("pcycles is null\n");
             return;
         }
 
         cycles_num = prot_cycles_num[data->index];
         if (cycles_num > 5)
         {
+            ir_printf("cycles number exceeded\n");
             return;
         }
 
