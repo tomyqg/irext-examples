@@ -47,6 +47,12 @@ public class IRDecode {
         return mInstance;
     }
 
+    private IRDecode() {
+        String libPath = "/develop/irext/core/src/ir_decoder/cmake-build-debug/libirda_decoder.so";
+        System.out.println("loading decode library " + libPath);
+        System.load(libPath);
+    }
+
     public int openFile(int category, int subCate, String fileName) {
         return irOpen(category, subCate, fileName);
     }
@@ -56,6 +62,9 @@ public class IRDecode {
     }
 
     public int[] decodeBinary(int keyCode, ACStatus acStatus, int changeWindDir) {
+        if (null == acStatus) {
+            acStatus = new ACStatus();
+        }
         return irDecode(keyCode, acStatus, changeWindDir);
     }
 

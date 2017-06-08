@@ -1,5 +1,7 @@
 package net.irext.decodesdk.bean;
 
+import net.irext.decodesdk.utils.Constants;
+
 /**
  * Filename:       ACStatus.java
  * Revised:        Date: 2017-03-28
@@ -24,6 +26,14 @@ public class ACStatus {
     private int acTimer;
 
     public ACStatus() {
+        this.acPower = Constants.ACPower.POWER_OFF.getValue();
+        this.acMode = Constants.ACMode.MODE_AUTO.getValue();
+        this.acTemp = Constants.ACTemperature.TEMP_24.getValue();
+        this.acWindSpeed = Constants.ACWindSpeed.SPEED_AUTO.getValue();
+        this.acWindDir = Constants.ACSwing.SWING_ON.getValue();
+        this.acTimer = 0;
+        this.acDisplay = 0;
+        this.acSleep = 0;
     }
 
     public ACStatus(int acPower, int acMode, int acTemp, int acWindSpeed, int acWindDir,
@@ -101,4 +111,5 @@ public class ACStatus {
     public void setAcTimer(int acTimer) {
         this.acTimer = acTimer;
     }
+
 }
