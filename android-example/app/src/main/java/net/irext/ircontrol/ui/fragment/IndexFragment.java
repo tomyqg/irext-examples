@@ -18,6 +18,7 @@ import net.irext.ircontrol.ui.adapter.IndexAdapter;
 import net.irext.ircontrol.utils.FileUtils;
 import net.irext.ircontrol.utils.MessageUtil;
 import net.irext.webapi.model.Brand;
+import net.irext.webapi.model.Category;
 import net.irext.webapi.model.City;
 import net.irext.webapi.model.RemoteIndex;
 import net.irext.webapi.model.StbOperator;
@@ -51,40 +52,30 @@ public class IndexFragment extends BaseCreateFragment {
     private List<RemoteIndex> mIndexes;
     private RemoteIndex mCurrentIndex;
 
+    private int mBrandId = 0;
+    private String mCityCode = "";
+    private String mOperatorId = "";
+
+    private String mCategoryName = "";
+    private String mCityName = "";
+    private String mBrandName = "";
+    private String mOperatorName = "";
+
     private IndexAdapter mIndexAdapter;
 
     private MsgHandler mMsgHandler;
     private IRApplication mApp;
 
     public IndexFragment() {
+
     }
 
     private void listIndexes() {
         new Thread() {
             @Override
             public void run() {
-                Brand brand = mParent.getCurrentBrand();
-                City city = mParent.getCurrentCity();
-                StbOperator operator = mParent.getCurrentOperator();
-
-                int brandId = 0;
-                String cityCode = null;
-                String operatorId = null;
-
-                if (null != brand) {
-                    brandId = brand.getId();
-                }
-
-                if (null != city) {
-                    cityCode = city.getCode();
-                }
-
-                if (null != operator) {
-                    operatorId = operator.getOperatorId();
-                }
-
-                mIndexes = mApp.mWeAPIs.listRemoteIndexes(mParent.getCurrentCategory().getId(),  brandId,
-                                cityCode, operatorId);
+                mIndexes = mApp.mWeAPIs.listRemoteIndexes(mParent.getCurrentCategory().getId(),
+                        mBrandId, mCityCode, mOperatorId);
                 if (null == mIndexes) {
                     mIndexes = new ArrayList<>();
                 }
@@ -131,15 +122,16 @@ public class IndexFragment extends BaseCreateFragment {
     }
 
     private void saveRemoteControl() {
+        // TODO： update brand and operator name i18n
         RemoteControl remoteControl = new RemoteControl();
         remoteControl.setCategoryId(mCurrentIndex.getCategoryId());
-        remoteControl.setCategoryName(mCurrentIndex.getCategoryName());
+        remoteControl.setCategoryName(mCategoryName);
         remoteControl.setBrandId(mCurrentIndex.getBrandId());
-        remoteControl.setBrandName(mCurrentIndex.getBrandName());
+        remoteControl.setBrandName(mBrandName);
         remoteControl.setCityCode(mCurrentIndex.getCityCode());
-        remoteControl.setCityName(mCurrentIndex.getCityName());
+        remoteControl.setCityName(mCityName);
         remoteControl.setOperatorId(mCurrentIndex.getOperatorId());
-        remoteControl.setOperatorName(mCurrentIndex.getOperatorName());
+        remoteControl.setOperatorName(mOperatorName);
         remoteControl.setProtocol(mCurrentIndex.getProtocol());
         remoteControl.setRemote(mCurrentIndex.getRemote());
         remoteControl.setRemoteMap(mCurrentIndex.getRemoteMap());
@@ -150,7 +142,7 @@ public class IndexFragment extends BaseCreateFragment {
     }
 
     private void refreshIndexes() {
-        mIndexAdapter = new IndexAdapter(mParent, mIndexes);
+        mIndexAdapter = new IndexAdapter(mParent, mIndexes, mBrandName, mOperatorName);
         mIndexList.setAdapter(mIndexAdapter);
         mIndexList.onRefreshComplete();
     }
@@ -164,6 +156,25 @@ public class IndexFragment extends BaseCreateFragment {
 
         mMsgHandler = new MsgHandler(this);
         mApp = (IRApplication) this.getActivity().getApplication();
+
+        Category category = mParent.getCurrentCategory();
+        Brand brand = mParent.getCurrentBrand();
+        City city = mParent.getCurrentCity();
+        StbOperator operator = mParent.getCurrentOperator();
+
+        mCategoryName = category.getName();
+        if (null != city) {
+            mCityName = city.getName();
+            mCityCode = city.getCode();
+        }
+        if (null != operator) {
+            mOperatorName = operator.getOperatorName();
+            mOperatorId = operator.getOperatorId();
+        }
+        if (null != brand) {
+            mBrandName = brand.getName();
+            mBrandId = brand.getId();
+        }
 
         mIndexList = (PullToRefreshListView) view.findViewById(R.id.lv_index_list);
         mIndexList.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {

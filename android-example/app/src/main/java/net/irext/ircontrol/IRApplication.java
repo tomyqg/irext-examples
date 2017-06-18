@@ -21,7 +21,8 @@ public class IRApplication extends com.activeandroid.app.Application {
 
     private static final String TAG = IRApplication.class.getSimpleName();
 
-    private static final String ADDRESS = "http://irext.net:8080";
+    // private static final String ADDRESS = "http://irext.net";
+    private static final String ADDRESS = "http://192.168.1.100:8080";
     private static final String APP_NAME = "/irext-server";
 
     public WebAPIs mWeAPIs = WebAPIs.getInstance(ADDRESS, APP_NAME);

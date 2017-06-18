@@ -26,10 +26,14 @@ public class IndexAdapter extends BaseAdapter {
 
     private List<RemoteIndex> mIndexes;
     private LayoutInflater mInflater;
+    private String mBrandName;
+    private String mOperatorName;
 
-    public IndexAdapter(Context ctx, List<RemoteIndex> list) {
+    public IndexAdapter(Context ctx, List<RemoteIndex> list, String brandName, String operatorName) {
         this.mIndexes = list;
         this.mInflater = (LayoutInflater)ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.mBrandName = brandName;
+        this.mOperatorName = operatorName;
     }
 
     @Override
@@ -61,9 +65,9 @@ public class IndexAdapter extends BaseAdapter {
         }
         RemoteIndex index = mIndexes.get(position);
         if (index.getCategoryId() != Constants.CategoryID.STB.getValue()) {
-            holder.textName.setText(index.getBrandName() + " " + (position + 1));
+            holder.textName.setText(mBrandName + " " + (position + 1));
         } else {
-            holder.textName.setText(index.getOperatorName() + " " + (position + 1));
+            holder.textName.setText(mOperatorName + " " + (position + 1));
         }
         holder.textMap.setText(index.getRemoteMap());
         return convertView;

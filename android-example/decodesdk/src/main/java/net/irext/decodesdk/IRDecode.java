@@ -48,9 +48,7 @@ public class IRDecode {
     }
 
     private IRDecode() {
-        String libPath = "/develop/irext/core/src/ir_decoder/cmake-build-debug/libirda_decoder.so";
-        System.out.println("loading decode library " + libPath);
-        System.load(libPath);
+
     }
 
     public int openFile(int category, int subCate, String fileName) {
