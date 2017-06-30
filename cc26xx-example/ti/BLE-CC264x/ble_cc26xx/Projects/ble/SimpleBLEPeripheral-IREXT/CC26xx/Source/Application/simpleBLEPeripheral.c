@@ -670,6 +670,9 @@ static void SimpleBLEPeripheral_init(void)
 
     // Setup the GAP Peripheral Role Profile
     {
+        // Print advertisement data
+        uint16_t pIndex = 0;
+
         // For all hardware platforms, device starts advertising upon initialization
         uint8_t initialAdvertEnable = TRUE;
 
@@ -690,8 +693,35 @@ static void SimpleBLEPeripheral_init(void)
         GAPRole_SetParameter(GAPROLE_ADVERT_OFF_TIME, sizeof(uint16_t),
                              &advertOffTime);
 
+#if defined UARD_DEBUG
+        // print adv data
+        PrintString("\r\n--- response data ---\r\n");
+        for (pIndex = 0; pIndex < sizeof(scanRspData); pIndex++)
+        {
+            WriteValue("0x", scanRspData[pIndex], FORMAT_HEX);
+            UART_DLY_ms(10);
+            PrintString(" ");
+            UART_DLY_ms(10);
+        }
+        PrintString("\r\n-----\r\n");
+#endif
+
         GAPRole_SetParameter(GAPROLE_SCAN_RSP_DATA, sizeof(scanRspData),
                              scanRspData);
+
+#if defined UARD_DEBUG
+        // print adv data
+        PrintString("\r\n--- adv data ---\r\n");
+        for (pIndex = 0; pIndex < sizeof(advertData); pIndex++)
+        {
+            WriteValue("0x", advertData[pIndex], FORMAT_HEX);
+            UART_DLY_ms(10);
+            PrintString(" ");
+            UART_DLY_ms(10);
+        }
+        PrintString("\r\n-----\r\n");
+#endif
+
         GAPRole_SetParameter(GAPROLE_ADVERT_DATA, sizeof(advertData), advertData);
 
         GAPRole_SetParameter(GAPROLE_PARAM_UPDATE_ENABLE, sizeof(uint8_t),
