@@ -16,6 +16,11 @@ import net.irext.ircontrol.ui.activity.CreateActivity;
 import net.irext.ircontrol.ui.adapter.CityAdapter;
 import net.irext.ircontrol.ui.adapter.OperatorAdapter;
 import net.irext.ircontrol.utils.MessageUtil;
+
+import net.irext.webapi.WebAPICallbacks.ListProvincesCallback;
+import net.irext.webapi.WebAPICallbacks.ListCitiesCallback;
+import net.irext.webapi.WebAPICallbacks.ListOperatersCallback;
+
 import net.irext.webapi.model.City;
 import net.irext.webapi.model.StbOperator;
 
@@ -57,6 +62,70 @@ public class CityFragment extends BaseCreateFragment {
     private MsgHandler mMsgHandler;
     private IRApplication mApp;
 
+    private ListProvincesCallback mListProvincesCallback = new ListProvincesCallback() {
+        @Override
+        public void onListProvincesSuccess(List<City> provinces) {
+            mProvinces = provinces;
+            if (null == mProvinces) {
+                mProvinces = new ArrayList<>();
+            }
+            MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_PROVINCE_LIST);
+        }
+
+        @Override
+        public void onListProvincesFailed() {
+            Log.w(TAG, "list provinces failed");
+        }
+
+        @Override
+        public void onListProvincesError() {
+            Log.e(TAG, "list provinces error");
+        }
+    };
+
+    private ListCitiesCallback mListCitiesCallback = new ListCitiesCallback() {
+        @Override
+        public void onListCitiesSuccess(List<City> cities) {
+            mCities = cities;
+            if (null == mCities) {
+                mCities = new ArrayList<>();
+            }
+            MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_CITY_LIST);
+        }
+
+        @Override
+        public void onListCitiesFailed() {
+            Log.w(TAG, "list cities failed");
+        }
+
+        @Override
+        public void onListCitiesError() {
+            Log.w(TAG, "list cities error");
+        }
+    };
+
+    private ListOperatersCallback mListOperatorCallback = new ListOperatersCallback() {
+
+        @Override
+        public void onListOperatorsSuccess(List<StbOperator> operators) {
+            mOperators = operators;
+            if (null == mOperators) {
+                mOperators = new ArrayList<>();
+            }
+            MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_OPERATOR_LIST);
+        }
+
+        @Override
+        public void onListOperatorsFailed() {
+            Log.w(TAG, "list operators failed");
+        }
+
+        @Override
+        public void onListOperatorsError() {
+            Log.e(TAG, "list operators error");
+        }
+    };
+
     private City mCurrentProvince;
 
     private int mListLevel = LEVEL_PROVINCE;
@@ -70,13 +139,8 @@ public class CityFragment extends BaseCreateFragment {
             new Thread() {
                 @Override
                 public void run() {
-                    mProvinces = mApp.mWeAPIs
-                            .listProvinces();
-
-                    if (null == mProvinces) {
-                        mProvinces = new ArrayList<>();
-                    }
-                    MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_PROVINCE_LIST);
+                    mApp.mWeAPIs
+                            .listProvinces(mListProvincesCallback);
                 }
             }.start();
         } else {
@@ -89,13 +153,8 @@ public class CityFragment extends BaseCreateFragment {
         new Thread() {
             @Override
             public void run() {
-                mCities = mApp.mWeAPIs
-                        .listCities(prefix);
-
-                if (null == mCities) {
-                    mCities = new ArrayList<>();
-                }
-                MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_CITY_LIST);
+                mApp.mWeAPIs
+                        .listCities(prefix, mListCitiesCallback);
             }
         }.start();
     }
@@ -105,13 +164,8 @@ public class CityFragment extends BaseCreateFragment {
         new Thread() {
             @Override
             public void run() {
-                mOperators = mApp.mWeAPIs
-                        .listOperators(cityCode);
-
-                if (null == mOperators) {
-                    mOperators = new ArrayList<>();
-                }
-                MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_OPERATOR_LIST);
+                mApp.mWeAPIs
+                        .listOperators(cityCode, mListOperatorCallback);
             }
         }.start();
     }

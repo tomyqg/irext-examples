@@ -17,6 +17,8 @@ import net.irext.ircontrol.R;
 import net.irext.ircontrol.ui.adapter.IndexAdapter;
 import net.irext.ircontrol.utils.FileUtils;
 import net.irext.ircontrol.utils.MessageUtil;
+import net.irext.webapi.WebAPICallbacks.ListIndexesCallback;
+import net.irext.webapi.WebAPICallbacks.DownloadBinCallback;
 import net.irext.webapi.model.Brand;
 import net.irext.webapi.model.Category;
 import net.irext.webapi.model.City;
@@ -45,7 +47,8 @@ public class IndexFragment extends BaseCreateFragment {
 
     private static final int CMD_REFRESH_INDEX_LIST = 0;
     private static final int CMD_DOWNLOAD_BIN_FILE = 1;
-    private static final int CMD_SAVE_REMOTE_CONTROL = 2;
+    private static final int CMD_BIN_FILE_DOWNLOADED = 2;
+    private static final int CMD_SAVE_REMOTE_CONTROL = 3;
 
     private PullToRefreshListView mIndexList;
 
@@ -61,10 +64,53 @@ public class IndexFragment extends BaseCreateFragment {
     private String mBrandName = "";
     private String mOperatorName = "";
 
+    private InputStream mBinStream;
+
     private IndexAdapter mIndexAdapter;
 
     private MsgHandler mMsgHandler;
     private IRApplication mApp;
+
+    private ListIndexesCallback mListIndexesCallback = new ListIndexesCallback() {
+
+        @Override
+        public void onListIndexesSuccess(List<RemoteIndex> indexes) {
+            mIndexes = indexes;
+            if (null == mIndexes) {
+                mIndexes = new ArrayList<>();
+            }
+            MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_INDEX_LIST);
+        }
+
+        @Override
+        public void onListIndexesFailed() {
+            Log.w(TAG, "list indexes failed");
+        }
+
+        @Override
+        public void onListIndexesError() {
+            Log.e(TAG, "list indexes error");
+        }
+    };
+
+    private DownloadBinCallback mDownloadBinCallback = new DownloadBinCallback() {
+        @Override
+        public void onDownloadBinSuccess(InputStream inputStream) {
+            Log.d(TAG, "binary file download successfully");
+            mBinStream = inputStream;
+            MessageUtil.postMessage(mMsgHandler, CMD_BIN_FILE_DOWNLOADED);
+        }
+
+        @Override
+        public void onDownloadBinFailed() {
+            Log.w(TAG, "download bin file failed");
+        }
+
+        @Override
+        public void onDownloadBinError() {
+            Log.w(TAG, "download bin file error");
+        }
+    };
 
     public IndexFragment() {
 
@@ -74,12 +120,8 @@ public class IndexFragment extends BaseCreateFragment {
         new Thread() {
             @Override
             public void run() {
-                mIndexes = mApp.mWeAPIs.listRemoteIndexes(mParent.getCurrentCategory().getId(),
-                        mBrandId, mCityCode, mOperatorId);
-                if (null == mIndexes) {
-                    mIndexes = new ArrayList<>();
-                }
-                MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_INDEX_LIST);
+                mApp.mWeAPIs.listRemoteIndexes(mParent.getCurrentCategory().getId(),
+                        mBrandId, mCityCode, mOperatorId, mListIndexesCallback);
             }
         }.start();
     }
@@ -91,21 +133,7 @@ public class IndexFragment extends BaseCreateFragment {
                 try {
                     String remoteMap = mCurrentIndex.getRemoteMap();
                     int indexId = mCurrentIndex.getId();
-                    InputStream in = mApp.mWeAPIs.downloadBin(remoteMap, indexId);
-                    if (createDirectory()) {
-                        File binFile = new File(FileUtils.BIN_PATH +
-                                FileUtils.FILE_NAME_PREFIX + mCurrentIndex.getRemoteMap() +
-                                FileUtils.FILE_NAME_EXT);
-                        FileUtils.write(binFile, in);
-                    } else {
-                        Log.w(TAG, "no directory to contain bin file");
-                    }
-
-                    if (null != in) {
-                        MessageUtil.postMessage(mMsgHandler, CMD_SAVE_REMOTE_CONTROL);
-                    } else {
-                        Log.e(TAG, "bin file download failed");
-                    }
+                    mApp.mWeAPIs.downloadBin(remoteMap, indexId, mDownloadBinCallback);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -119,6 +147,29 @@ public class IndexFragment extends BaseCreateFragment {
             return true;
         }
         return file.mkdirs();
+    }
+
+    private void saveBinFile() {
+        new Thread() {
+            @Override
+            public void run() {
+                if (createDirectory()) {
+                    File binFile = new File(FileUtils.BIN_PATH +
+                            FileUtils.FILE_NAME_PREFIX + mCurrentIndex.getRemoteMap() +
+                            FileUtils.FILE_NAME_EXT);
+                    boolean ret = FileUtils.write(binFile, mBinStream);
+                    Log.d(TAG, "write bin file succeeded : " + ret);
+                } else {
+                    Log.w(TAG, "no directory to contain bin file");
+                }
+
+                if (null != mBinStream) {
+                    MessageUtil.postMessage(mMsgHandler, CMD_SAVE_REMOTE_CONTROL);
+                } else {
+                    Log.e(TAG, "bin file download failed");
+                }
+            }
+        }.start();
     }
 
     private void saveRemoteControl() {
@@ -138,6 +189,8 @@ public class IndexFragment extends BaseCreateFragment {
         remoteControl.setSubCategory(mCurrentIndex.getSubCate());
 
         long id = RemoteControl.createRemoteControl(remoteControl);
+
+        Log.d(TAG, "save remote control : " + id);
         mParent.finish();
     }
 
@@ -224,6 +277,10 @@ public class IndexFragment extends BaseCreateFragment {
 
                 case CMD_DOWNLOAD_BIN_FILE:
                     indexFragment.downloadBinFile();
+                    break;
+
+                case CMD_BIN_FILE_DOWNLOADED:
+                    indexFragment.saveBinFile();
                     break;
 
                 case CMD_SAVE_REMOTE_CONTROL:

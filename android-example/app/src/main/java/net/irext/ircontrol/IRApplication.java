@@ -4,8 +4,10 @@ import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
 
+import net.irext.webapi.WebAPICallbacks;
 import net.irext.webapi.WebAPIs;
 import net.irext.webapi.model.UserApp;
+import net.irext.webapi.WebAPICallbacks.SignInCallback;
 
 /**
  * Filename:       IRApplication.java
@@ -29,6 +31,23 @@ public class IRApplication extends com.activeandroid.app.Application {
 
     private UserApp mUserApp;
 
+    private SignInCallback mSignInCallback = new SignInCallback() {
+        @Override
+        public void onSignInSuccess(UserApp admin) {
+            mUserApp = admin;
+        }
+
+        @Override
+        public void onSignInFailed() {
+            Log.w(TAG, "sign in failed");
+        }
+
+        @Override
+        public void onSignInError() {
+            Log.e(TAG, "sign in error");
+        }
+    };
+
     public UserApp getAdmin() {
         return mUserApp;
     }
@@ -44,7 +63,7 @@ public class IRApplication extends com.activeandroid.app.Application {
         new Thread() {
             @Override
             public void run() {
-                mUserApp = mWeAPIs.signIn(IRApplication.this);
+                mWeAPIs.signIn(IRApplication.this, mSignInCallback);
                 if (null != mUserApp) {
                     Log.d(TAG, "signIn response : " + mUserApp.getId() + ", " + mUserApp.getToken());
                 }

@@ -15,6 +15,7 @@ import net.irext.ircontrol.ui.activity.CreateActivity;
 import net.irext.ircontrol.ui.adapter.BrandAdapter;
 import net.irext.ircontrol.ui.widget.PullToRefreshListView;
 import net.irext.ircontrol.utils.MessageUtil;
+import net.irext.webapi.WebAPICallbacks.ListBrandsCallback;
 import net.irext.webapi.model.Brand;
 
 import java.lang.ref.WeakReference;
@@ -46,6 +47,27 @@ public class BrandFragment extends BaseCreateFragment {
     private MsgHandler mMsgHandler;
     private IRApplication mApp;
 
+    private ListBrandsCallback mListBrandsCallback = new ListBrandsCallback() {
+        @Override
+        public void onListBrandsSuccess(List<Brand> brands) {
+            mBrands = brands;
+            if (null == mBrands) {
+                mBrands = new ArrayList<>();
+            }
+            MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_BRAND_LIST);
+        }
+
+        @Override
+        public void onListBrandsFailed() {
+            Log.w(TAG, "list brands failed");
+        }
+
+        @Override
+        public void onListBrandsError() {
+            Log.e(TAG, "list brands error");
+        }
+    };
+
     public BrandFragment() {
     }
 
@@ -53,12 +75,9 @@ public class BrandFragment extends BaseCreateFragment {
         new Thread() {
             @Override
             public void run() {
-                mBrands = mApp.mWeAPIs
-                        .listBrands(mParent.getCurrentCategory().getId(), 0, 20);
-                if (null == mBrands) {
-                    mBrands = new ArrayList<>();
-                }
-                MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_BRAND_LIST);
+                mApp.mWeAPIs
+                        .listBrands(mParent.getCurrentCategory().getId(), 0, 20,
+                                mListBrandsCallback);
             }
         }.start();
     }

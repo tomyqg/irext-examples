@@ -17,6 +17,7 @@ import net.irext.ircontrol.ui.widget.PullToRefreshListView;
 import net.irext.ircontrol.utils.MessageUtil;
 import net.irext.decodesdk.utils.Constants;
 import net.irext.webapi.model.Category;
+import net.irext.webapi.WebAPICallbacks.ListCategoriesCallback;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -46,6 +47,27 @@ public class CategoryFragment extends BaseCreateFragment {
     private MsgHandler mMsgHandler;
     private IRApplication mApp;
 
+    private ListCategoriesCallback mListCategoriesCallback = new ListCategoriesCallback() {
+        @Override
+        public void onListCategoriesSuccess(List<Category> categories) {
+            mCategories = categories;
+            if (null == mCategories) {
+                mCategories = new ArrayList<>();
+            }
+            MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_CATEGORY_LIST);
+        }
+
+        @Override
+        public void onListCategoriesFailed() {
+            Log.w(TAG, "list categories failed");
+        }
+
+        @Override
+        public void onListCategoriesError() {
+            Log.e(TAG, "list categories error");
+        }
+    };
+
     public CategoryFragment() {
     }
 
@@ -53,11 +75,7 @@ public class CategoryFragment extends BaseCreateFragment {
         new Thread() {
             @Override
             public void run() {
-                mCategories = mApp.mWeAPIs.listCategories(0, 20);
-                if (null == mCategories) {
-                    mCategories = new ArrayList<>();
-                }
-                MessageUtil.postMessage(mMsgHandler, CMD_REFRESH_CATEGORY_LIST);
+                mApp.mWeAPIs.listCategories(0, 20, mListCategoriesCallback);
             }
         }.start();
     }
