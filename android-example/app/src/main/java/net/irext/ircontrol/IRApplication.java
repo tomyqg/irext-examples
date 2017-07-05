@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.activeandroid.ActiveAndroid;
 
-import net.irext.webapi.WebAPICallbacks;
 import net.irext.webapi.WebAPIs;
 import net.irext.webapi.model.UserApp;
 import net.irext.webapi.WebAPICallbacks.SignInCallback;
@@ -23,8 +22,7 @@ public class IRApplication extends com.activeandroid.app.Application {
 
     private static final String TAG = IRApplication.class.getSimpleName();
 
-    // private static final String ADDRESS = "http://irext.net";
-    private static final String ADDRESS = "http://192.168.1.100:8080";
+    private static final String ADDRESS = "http://irext.net";
     private static final String APP_NAME = "/irext-server";
 
     public WebAPIs mWeAPIs = WebAPIs.getInstance(ADDRESS, APP_NAME);
