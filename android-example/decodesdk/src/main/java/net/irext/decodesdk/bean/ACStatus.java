@@ -48,67 +48,67 @@ public class ACStatus {
         this.acTimer = acTimer;
     }
 
-    public int getAcPower() {
+    public int getACPower() {
         return acPower;
     }
 
-    public void setAcPower(int acPower) {
+    public void setACPower(int acPower) {
         this.acPower = acPower;
     }
 
-    public int getAcTemp() {
+    public int getACTemp() {
         return acTemp;
     }
 
-    public void setAcTemp(int acTemp) {
+    public void setACTemp(int acTemp) {
         this.acTemp = acTemp;
     }
 
-    public int getAcMode() {
+    public int getACMode() {
         return acMode;
     }
 
-    public void setAcMode(int acMode) {
+    public void setACMode(int acMode) {
         this.acMode = acMode;
     }
 
-    public int getAcWindDir() {
+    public int getACWindDir() {
         return acWindDir;
     }
 
-    public void setAcWindDir(int acWindDir) {
+    public void setACWindDir(int acWindDir) {
         this.acWindDir = acWindDir;
     }
 
-    public int getAcWindSpeed() {
+    public int getACWindSpeed() {
         return acWindSpeed;
     }
 
-    public void setAcWindSpeed(int acWindSpeed) {
+    public void setACWindSpeed(int acWindSpeed) {
         this.acWindSpeed = acWindSpeed;
     }
 
-    public int getAcDisplay() {
+    public int getACDisplay() {
         return acDisplay;
     }
 
-    public void setAcDisplay(int acDisplay) {
+    public void setACDisplay(int acDisplay) {
         this.acDisplay = acDisplay;
     }
 
-    public int getAcSleep() {
+    public int getACSleep() {
         return acSleep;
     }
 
-    public void setAcSleep(int acSleep) {
+    public void setACSleep(int acSleep) {
         this.acSleep = acSleep;
     }
 
-    public int getAcTimer() {
+    public int getACTimer() {
         return acTimer;
     }
 
-    public void setAcTimer(int acTimer) {
+    public void setACTimer(int acTimer) {
         this.acTimer = acTimer;
     }
 
