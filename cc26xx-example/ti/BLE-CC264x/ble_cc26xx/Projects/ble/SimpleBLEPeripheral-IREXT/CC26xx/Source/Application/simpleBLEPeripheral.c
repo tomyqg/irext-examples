@@ -670,9 +670,6 @@ static void SimpleBLEPeripheral_init(void)
 
     // Setup the GAP Peripheral Role Profile
     {
-        // Print advertisement data
-        uint16_t pIndex = 0;
-
         // For all hardware platforms, device starts advertising upon initialization
         uint8_t initialAdvertEnable = TRUE;
 
