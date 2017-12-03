@@ -140,16 +140,16 @@ static decode_control_block dccb =
     .decoded_length = 0,
 };
 
-static remote_ac_status_t ac_status =
+static t_remote_ac_status ac_status =
 {
-    .acPower = AC_POWER_OFF,
-    .acTemp = AC_TEMP_24,
-    .acMode = AC_MODE_COOL,
-    .acWindDir = AC_SWING_ON,
-    .acWindSpeed = AC_WS_AUTO,
-    .acDisplay = 0,
-    .acSleep = 0,
-    .acTimer = 0,
+    .ac_power = AC_POWER_OFF,
+    .ac_temp = AC_TEMP_24,
+    .ac_mode = AC_MODE_COOL,
+    .ac_wind_dir = AC_SWING_ON,
+    .ac_wind_speed = AC_WS_AUTO,
+    .ac_display = 0,
+    .ac_sleep = 0,
+    .ac_timer = 0,
 };
 
 
