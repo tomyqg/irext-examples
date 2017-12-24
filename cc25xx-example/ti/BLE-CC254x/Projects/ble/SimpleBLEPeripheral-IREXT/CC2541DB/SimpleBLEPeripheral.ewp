@@ -1407,6 +1407,8 @@
           <state>HAL_LED=TRUE</state>
           <state>HAL_UART=TRUE</state>
           <state>xLCD_TO_UART</state>
+          <state>BOARD_51</state>
+          <state>NO_FS</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -1597,7 +1599,8 @@
           <state>$PROJ_DIR$\..\..\Profiles\Roles</state>
           <state>$PROJ_DIR$\..\..\Profiles\SimpleProfile</state>
           <state>$PROJ_DIR$\..\..\Profiles\DevInfo</state>
-          <state>$PROJ_DIR$\..\..\SimpleBLEPeripheral\Source</state>
+          <state>$PROJ_DIR$\..\..\SimpleBLEPeripheral-IREXT\Source</state>
+          <state>$PROJ_DIR$\..\..\SimpleBLEPeripheral-IREXT\Source\Irext\include</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -6661,6 +6664,36 @@
   </configuration>
   <group>
     <name>APP</name>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_ac_apply.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_ac_binary_parse.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_ac_build_frame.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_ac_control.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_ac_parse_forbidden_info.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_ac_parse_frame_info.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_ac_parse_parameter.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_decode.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_tv_control.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\Source\Irext\src\ir_utils.c</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\..\Source\OSAL_simpleBLECentral.c</name>
     </file>

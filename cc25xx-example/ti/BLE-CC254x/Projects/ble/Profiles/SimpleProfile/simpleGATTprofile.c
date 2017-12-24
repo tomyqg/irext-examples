@@ -53,11 +53,11 @@
 #include "hal_lcd.h"
 #include "simpleBle.h"
 
-
+/*
 #define LCD_WRITE_STRING(str, option)
 #define LCD_WRITE_SCREEN(line1, line2)
 #define LCD_WRITE_STRING_VALUE(title, value, format, line)
-
+*/
 
 
 /*********************************************************************
