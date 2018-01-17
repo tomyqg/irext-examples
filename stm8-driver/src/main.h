@@ -70,7 +70,7 @@ typedef struct
 {
     ir_type_t ir_type;
     ir_state_t ir_state;
-    uint8_t recv_index;
+    uint16_t recv_index;
     uint8_t source_code[BINARY_SOURCE_SIZE_MAX];
     uint16_t source_code_length;
     uint16_t ir_decoded[USER_DATA_SIZE];

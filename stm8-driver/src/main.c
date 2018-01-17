@@ -37,6 +37,7 @@
 #define REQ_ERR                 0x52
 #define REQ_READ                0x53
 #define REQ_CATEGORY            0x54
+#define REQ_COMMAND             0x55
 
 #define RSP_READY               0x60
 #define RSP_INDEX               0x61
@@ -45,6 +46,8 @@
 #define RSP_DONE                0x64
 #define RSP_INDEX_DONE          0x65
 #define RSP_CMD_ERR             0x66
+#define RSP_IR_OPENED           0x67
+#define RSP_IR_FAILURE          0x68
 
 #define BLOCK_BYTES             16
 
@@ -84,6 +87,9 @@ static void IRext_processUartMsg();
 static void HandleBinReady();
 static void HandleBinWrite();
 static void HandleBinCategory();
+static void HandleCommand();
+static void PrepareDecoding();
+
 
 static void ParseCommand(uint8_t* data, uint16_t len);
 static void TransportDataToUart(uint8_t* data, uint16_t len);
@@ -135,7 +141,7 @@ void init_GPIO()
 void init_UART()
 {
     UART3_DeInit();
-    UART3_Init((uint32_t)9600, UART3_WORDLENGTH_8D, UART3_STOPBITS_1, UART3_PARITY_NO,
+    UART3_Init((uint32_t)115200, UART3_WORDLENGTH_8D, UART3_STOPBITS_1, UART3_PARITY_NO,
                UART3_MODE_TXRX_ENABLE);
 
 #if defined UART_INT
@@ -249,6 +255,8 @@ static void IRext_processUartMsg()
         case REQ_CATEGORY:
             HandleBinCategory();
             break;
+        case REQ_COMMAND:
+            HandleCommand();
         default:
             break;
     }
@@ -265,6 +273,7 @@ static void HandleBinReady()
     */
     dccb.decoded_length = 0;
     memset(dccb.source_code, BINARY_SOURCE_SIZE_MAX, 0x00);
+    dccb.recv_index = 0;
     dccb.source_code_length = 0;
     putchar(RSP_READY);
 }
@@ -285,7 +294,7 @@ static void HandleBinWrite()
     // receive bin block index
     expected_index = getchar();
     // prepare the offset for the next write
-    dccb.recv_index = expected_index * BLOCK_BYTES;
+    dccb.recv_index = expected_index << 4;
 
     // receive expected length of next transfer
     expected_length = getchar();
@@ -301,6 +310,7 @@ static void HandleBinWrite()
         {
             dccb.source_code[dccb.recv_index + received] = getchar();
         }
+        dccb.source_code_length = dccb.recv_index + received;
         putchar(RSP_INDEX_DONE);
     }
 }
@@ -317,6 +327,19 @@ static void HandleBinCategory()
     dccb.ir_type = (ir_type_t)getchar();
     // bin transfer done
     putchar(RSP_DONE);
+    PrepareDecoding();
+}
+
+
+static void HandleCommand()
+{
+    /*
+       Request for write category
+       +----------------------+
+       | 0x55 | cate (1 byte) |
+       +----------------------+
+    */
+    
 }
 
 
@@ -353,6 +376,42 @@ static void ParseCommand(uint8_t* data, uint16_t len)
     }
     else
     {
+    }
+}
+
+
+static void PrepareDecoding()
+{
+    // parse IREXT binary automatically
+    if (IR_TYPE_TV == dccb.ir_type)
+    {
+        if (IR_DECODE_SUCCEEDED ==
+            ir_binary_open(IR_CATEGORY_TV, 1, dccb.source_code, dccb.source_code_length))
+        {
+            dccb.ir_state = IR_STATE_OPENED;
+            putchar(RSP_IR_OPENED);
+        }
+        else
+        {
+            putchar(RSP_IR_FAILURE);
+        }
+    }
+    else if (IR_TYPE_AC == dccb.ir_type)
+    {
+        if (IR_DECODE_SUCCEEDED ==
+            ir_binary_open(IR_CATEGORY_AC, 1, dccb.source_code, dccb.source_code_length))
+        {
+            dccb.ir_state = IR_STATE_OPENED;
+            putchar(RSP_IR_OPENED);
+        }
+        else
+        {
+            putchar(RSP_IR_FAILURE);
+        }
+    }
+    else
+    {
+        putchar(RSP_IR_FAILURE);
     }
 }
 
