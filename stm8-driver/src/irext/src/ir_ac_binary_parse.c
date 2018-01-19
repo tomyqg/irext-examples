@@ -49,7 +49,13 @@ INT8 binary_parse_offset()
     for (i = 0; i < tag_count; i++)
     {
         tags[i].tag = tag_index[i];
+
+#if defined BOARD_STM8 && defined COMPILER_IAR
+        UINT16 offset = *(phead + i);
+        tags[i].offset = (offset >> 8) | (offset << 8);
+#else
         tags[i].offset = *(phead + i);
+#endif
 
         if (tags[i].offset == TAG_INVALID)
         {
@@ -96,7 +102,7 @@ INT8 binary_parse_len()
 
 void binary_tags_info()
 {
-#if defined BOARD_PC
+#if defined BOARD_PC && defined DEBUG
     UINT16 i = 0;
     for (i = 0; i < tag_count; i++)
     {

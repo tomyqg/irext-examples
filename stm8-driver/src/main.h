@@ -20,6 +20,7 @@ extern "C"
 
 #include "ir_decode.h"
 
+// #define TEST_MODE
 
 // #define UART_INT
 

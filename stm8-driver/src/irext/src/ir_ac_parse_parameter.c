@@ -96,7 +96,6 @@ INT8 parse_common_ac_parameter(t_tag_head *tag, t_tag_comp *comp_data, UINT8 wit
     string_to_hex_common(tag->p_data, hex_data, hex_len);
 
     // parse hex data to AC data structure
-    //*comp_len = hex_len;
 
     if (AC_PARAMETER_TYPE_1 == type)
     {

@@ -87,6 +87,7 @@ INT8 ir_ac_lib_parse()
                 context->si.type = SWING_TYPE_NORMAL;
                 context->si.mode_count = 2;
             }
+            break;
             context->si.dir_index = 0;
         }
     }

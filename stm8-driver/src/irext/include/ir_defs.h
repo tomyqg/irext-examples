@@ -43,12 +43,12 @@ typedef int BOOL;
 
 void noprint(const char *fmt, ...);
 
-#if !defined BOARD_CC26XX
-#define ir_malloc(A) malloc(A)
-#define ir_free(A) free(A)
-#else
+#if defined BOARD_CC26XX
 #define ir_malloc(A) ICall_malloc(A)
 #define ir_free(A) ICall_free(A)
+#else
+#define ir_malloc(A) malloc(A)
+#define ir_free(A) free(A)
 #endif
 
 #define ir_memcpy(A, B, C) memcpy(A, B, C)

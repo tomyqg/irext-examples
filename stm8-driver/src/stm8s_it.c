@@ -430,9 +430,11 @@ INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
     /* In order to detect unexpected events during development,
        it is recommended to set a breakpoint on the following instruction.
     */
+#if !defined TEST_MODE
     timer4_callback();
     /* Cleat Interrupt Pending bit */
     TIM4_ClearITPendingBit(TIM4_IT_UPDATE);
+#endif
 }
 #endif /*STM8S903*/
 

@@ -357,7 +357,7 @@ typedef struct tag_head
 {
     UINT16 tag;
     UINT16 len;
-    unsigned short offset;
+    UINT16 offset;
     UINT8 *p_data;
 } t_tag_head;
 
