@@ -1,521 +1,437 @@
-/*******************************************************************************
- *
- *  Filename:      main.c
- *
- *  Description:   Main functions for Irext STM8 module driver
- *
- *  Created by strawmanbobi 2017-12-31
- *  Copyright (c) 2017 Irext. All rights reserved.
- *
- *******************************************************************************/
+/**************************************************************************************
+Filename:       main.c
+Revised:        Date: 2018-01-23
+Revision:       Revision: 1.0
 
-#include <string.h>
-#include "stm8s.h"
-#include "stdlib.h"
-#include "stdio.h"
-#include "main.h"
+Description:    This file provides driver for IR decode
 
+Revision log:
+* 2018-01-23: created by strawmanbobi
+**************************************************************************************/
 
-#ifdef _RAISONANCE_
-#define PUTCHAR_PROTOTYPE int putchar (char c)
-#define GETCHAR_PROTOTYPE int getchar (void)
-#elif defined (_COSMIC_)
-#define PUTCHAR_PROTOTYPE char putchar (char c)
-#define GETCHAR_PROTOTYPE char getchar (void)
-#else /* _IAR_ */
-#define PUTCHAR_PROTOTYPE int putchar (int c)
-#define GETCHAR_PROTOTYPE int getchar (void)
-#endif /* _RAISONANCE_ */
+#include <iostm8s207k8.h>
+#define UARTPORT(flag)    UART3_##flag
 
+#include <intrinsics.h>
+#include <stdlib.h>
 
-#define TIM4_PERIOD       124
-#define UART_RECV_STOP    200
+//
+//  Define where we will be working in the EEPROM.
+//
+#define EEPROM_BASE_ADDRESS         0x4000
+#define EEPROM_INITIAL_OFFSET       0x0040
+#define EEPROM_PULSE_DATA           ((unsigned char *) (EEPROM_BASE_ADDRESS + EEPROM_INITIAL_OFFSET))
+#define EEPROM_CARRIER_FREQUENCY
 
-/* UART related definition */
-#define REQ_READY               0x50
-#define REQ_WRITE               0x51
-#define REQ_ERR                 0x52
-#define REQ_READ                0x53
-#define REQ_CATEGORY            0x54
-#define REQ_COMMAND             0x55
+//
+//  Data ready for the pulse timer ISR's to use.
+//
+int _numberOfPulses = 0;
+int _currentPulse = 0;
+char *_pulseDataAddress = NULL;
 
-#define RSP_READY               0x60
-#define RSP_INDEX               0x61
-#define RSP_LENGTH              0x62
-#define RSP_DATA                0x63
-#define RSP_DONE                0x64
-#define RSP_INDEX_DONE          0x65
-#define RSP_CMD_ERR             0x66
-#define RSP_IR_OPENED           0x67
-#define RSP_IR_FAILURE          0x68
+//
+//  Prescalar for the timer.
+//
+int _prescalar = 1;
 
-#define BLOCK_BYTES             16
+//
+//  Some control variables to indicate if we are running or not.
+//
+#define STATE_WAITING_FOR_USER      0
+#define STATE_RUNNING               1
+int _currentState = STATE_WAITING_FOR_USER;
 
-/* prototypes */
-static decode_control_block_t dccb =
+//
+//  Working variables for the UART.
+//
+unsigned char *_currentTxByte;
+unsigned short _currentTxCount;
+unsigned short _txBufferLength;
+#define UART_TX_BUFFER_SIZE         258
+unsigned char _txBuffer[UART_TX_BUFFER_SIZE];
+//
+unsigned char *_currentRxByte;
+unsigned short _currentRxCount;
+unsigned short _rxBufferLength;
+#define UART_RX_BUFFER_SIZE         20
+unsigned char _rxBuffer[UART_RX_BUFFER_SIZE];
+//
+unsigned char *_textMessage = "OpenIR\r\n";
+//
+#define UART_MODE_WAITING_FOR_DATA          0
+#define UART_MODE_RECEIVING_DATA            1
+unsigned char _uartMode = UART_MODE_WAITING_FOR_DATA;
+
+//
+//  Commands which this remote control can understand.
+//
+#define COMMAND_GET_ID                  1
+#define COMMAND_SET_ID                  2
+#define COMMAND_GET_CARRIER_FREQUENCY   3
+#define COMMAND_SET_CARRIER_FREQUENCY   4
+#define COMMAND_GET_PULSE_DATA          5
+#define COMMAND_SET_PULSE_DATA          6
+#define COMMAND_TRANSMIT_PULSE_DATA     7
+#define COMMAND_TRANSMIT_THIS_DATA      8
+#define COMMAND_TIME_LAPSE              9
+#define COMMAND_RESET                   10
+#define COMMAND_POWER_LED_ENABLED       11
+
+//
+//  Error codes whch can be sent back to the calling application.
+//
+#define EC_OK                           0
+#define EC_UNKNOWN_COMMAND              1
+#define EC_RX_BUFFER_OVERFLOW           2
+
+//
+//  Generic method for sending a response.
+//
+void SendResponse(unsigned char *buffer, unsigned char length)
 {
-    .ir_type = IR_TYPE_NONE,
-    .ir_state = IR_STATE_STANDBY,
-    .source_code_length = 0,
-    .decoded_length = 0
-};
+    _txBufferLength = length;
+    _currentTxByte = buffer;
+    _currentTxCount = 0;
+    UARTPORT(DR = _txBufferLength + 1);
+    UARTPORT(CR2_TIEN = 1);
+}
 
-static t_remote_ac_status ac_status =
+//
+//  Send a negative acknowledgement to the requester along with an error code.
+//
+void SendNAK(unsigned char errorCode)
 {
-    .ac_power = AC_POWER_OFF,
-    .ac_temp = AC_TEMP_24,
-    .ac_mode = AC_MODE_COOL,
-    .ac_wind_dir = AC_SWING_ON,
-    .ac_wind_speed = AC_WS_AUTO,
-    .ac_display = 0,
-    .ac_sleep = 0,
-    .ac_timer = 0,
-};
+    _txBuffer[0] = errorCode;
+    SendResponse(_txBuffer, 1);
+}
 
-/* global variables */
-#if defined UART_DEFRAGMENT
-uint8_t receive_state = 0;
-uint8_t receive_buffer[1024] = { 0 };
-uint32_t received = 0;
-uint32_t uart_recv_stop_cd = UART_RECV_STOP;
-#endif
-
-
-/* local functions */
-static void IRext_processUartMsg();
-static void HandleBinReady();
-static void HandleBinWrite();
-static void HandleBinCategory();
-static void HandleCommand();
-static void PrepareDecoding();
-
-static void ParseCommand(uint8_t* data, uint16_t len);
-static void TransportDataToUart(uint8_t* data, uint16_t len);
-static void WriteBytes(uint8_t *data, uint16_t len);
-
-
-#if defined UART_DEFRAGMENT
-static void start_uart_cd(__IO uint32_t nTime);
-static void stop_uart_receive();
-#endif
-
-/* local vars */
-
-/* test mode */
-#if defined TEST_MODE
-#define TEST_BIN_SIZE 568
-const uint8_t ac_code[568] =
+//
+//  Send an acknowledgement to the requester.
+//
+void SendACK()
 {
-    0x1D, 0x00, 0x00, 0x09, 0x00, 0x10, 0x00, 0x18, 0x00, 0xFF, 0xFF, 0x33, 0x00, 0xFF, 0xFF, 0x34, 
-    0x00, 0x58, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 
-    0xFF, 0x76, 0x00, 0x7E, 0x01, 0xA6, 0x01, 0xCC, 0x01, 0xFF, 0xFF, 0xDC, 0x01, 0xE9, 0x01, 0xF6, 
-    0x01, 0xF8, 0x01, 0xFA, 0x01, 0xFC, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0x33, 0x31, 0x30, 0x30, 0x2C, 
-    0x39, 0x31, 0x30, 0x30, 0x35, 0x30, 0x30, 0x2C, 0x35, 0x30, 0x30, 0x35, 0x30, 0x30, 0x2C, 0x31, 
-    0x35, 0x30, 0x30, 0x36, 0x26, 0x35, 0x36, 0x30, 0x2C, 0x32, 0x35, 0x30, 0x30, 0x2C, 0x33, 0x30, 
-    0x30, 0x30, 0x2C, 0x39, 0x30, 0x30, 0x30, 0x7C, 0x2D, 0x31, 0x26, 0x35, 0x30, 0x30, 0x31, 0x30, 
-    0x30, 0x31, 0x30, 0x30, 0x31, 0x42, 0x32, 0x30, 0x36, 0x43, 0x30, 0x30, 0x38, 0x33, 0x32, 0x30, 
-    0x39, 0x41, 0x46, 0x30, 0x41, 0x37, 0x31, 0x30, 0x42, 0x30, 0x30, 0x30, 0x43, 0x31, 0x31, 0x30, 
-    0x44, 0x43, 0x30, 0x30, 0x45, 0x30, 0x32, 0x39, 0x32, 0x30, 0x46, 0x30, 0x30, 0x30, 0x30, 0x30, 
-    0x30, 0x46, 0x30, 0x30, 0x31, 0x31, 0x32, 0x41, 0x46, 0x37, 0x31, 0x30, 0x30, 0x31, 0x31, 0x46, 
-    0x30, 0x30, 0x30, 0x30, 0x30, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 0x30, 0x34, 0x43, 0x35, 
-    0x30, 0x30, 0x46, 0x35, 0x38, 0x35, 0x43, 0x30, 0x32, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 
-    0x46, 0x34, 0x43, 0x35, 0x30, 0x30, 0x45, 0x35, 0x38, 0x35, 0x43, 0x30, 0x33, 0x30, 0x39, 0x34, 
-    0x30, 0x34, 0x34, 0x30, 0x30, 0x34, 0x43, 0x35, 0x30, 0x30, 0x46, 0x35, 0x38, 0x35, 0x43, 0x30, 
-    0x34, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 0x46, 0x34, 0x43, 0x35, 0x30, 0x30, 0x45, 0x35, 
-    0x38, 0x35, 0x43, 0x30, 0x35, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 0x46, 0x34, 0x43, 0x35, 
-    0x30, 0x30, 0x45, 0x35, 0x38, 0x35, 0x43, 0x30, 0x36, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x430, 
-    0x45, 0x34, 0x43, 0x35, 0x30, 0x30, 0x45, 0x35, 0x38, 0x35, 0x43, 0x30, 0x37, 0x30, 0x39, 0x34, 
-    0x30, 0x34, 0x34, 0x30, 0x30, 0x34, 0x43, 0x35, 0x30, 0x30, 0x46, 0x35, 0x38, 0x35, 0x43, 0x30, 
-    0x38, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 0x46, 0x34, 0x43, 0x35, 0x30, 0x30, 0x45, 0x35, 
-    0x38, 0x35, 0x43, 0x30, 0x39, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 0x46, 0x34, 0x43, 0x35, 
-    0x30, 0x30, 0x45, 0x35, 0x38, 0x35, 0x43, 0x30, 0x41, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 
-    0x45, 0x34, 0x43, 0x35, 0x30, 0x30, 0x45, 0x35, 0x38, 0x35, 0x43, 0x30, 0x42, 0x30, 0x39, 0x34, 
-    0x30, 0x34, 0x34, 0x30, 0x46, 0x34, 0x43, 0x35, 0x30, 0x30, 0x45, 0x35, 0x38, 0x35, 0x43, 0x30, 
-    0x43, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 0x45, 0x34, 0x43, 0x35, 0x30, 0x30, 0x45, 0x35, 
-    0x38, 0x35, 0x43, 0x30, 0x44, 0x30, 0x39, 0x34, 0x30, 0x34, 0x34, 0x30, 0x45, 0x34, 0x43, 0x35, 
-    0x30, 0x30, 0x45, 0x35, 0x38, 0x35, 0x43, 0x30, 0x45, 0x30, 0x33, 0x36, 0x30, 0x36, 0x34, 0x30, 
-    0x31, 0x30, 0x33, 0x36, 0x30, 0x36, 0x34, 0x30, 0x34, 0x30, 0x33, 0x36, 0x30, 0x36, 0x34, 0x30, 
-    0x30, 0x30, 0x33, 0x36, 0x30, 0x36, 0x34, 0x30, 0x33, 0x30, 0x33, 0x36, 0x30, 0x36, 0x34, 0x30, 
-    0x32, 0x30, 0x33, 0x36, 0x34, 0x36, 0x38, 0x30, 0x31, 0x30, 0x33, 0x36, 0x34, 0x36, 0x38, 0x30, 
-    0x35, 0x30, 0x36, 0x36, 0x34, 0x36, 0x38, 0x30, 0x39, 0x35, 0x38, 0x35, 0x43, 0x30, 0x38, 0x30, 
-    0x33, 0x36, 0x34, 0x36, 0x38, 0x30, 0x42, 0x30, 0x33, 0x34, 0x38, 0x34, 0x43, 0x30, 0x41, 0x30, 
-    0x33, 0x34, 0x38, 0x34, 0x43, 0x30, 0x46, 0x54, 0x26, 0x30, 0x2C, 0x31, 0x7C, 0x53, 0x26, 0x31, 
-    0x2C, 0x32, 0x2C, 0x33, 0x54, 0x26, 0x30, 0x2C, 0x31, 0x7C, 0x53, 0x26, 0x31, 0x2C, 0x32, 0x2C, 
-    0x33, 0x4E, 0x41, 0x4E, 0x41, 0x4E, 0x41, 0x31
-};
-#endif
+    _txBuffer[0] = EC_OK;
+    SendResponse(_txBuffer, 1);
+}
 
-
-void main(void)
+//--------------------------------------------------------------------------------
+//
+//  Write the a block of data into EEPROM.
+//
+void WriteDataToEEPROM(unsigned char *data, int length, unsigned char *destination)
 {
-    CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
-
-#if defined TEST_MODE
-    // Init GPIO
-    init_GPIO();
-    // Init UART
-    init_UART();
-
-    int i = 0;
-
-    dccb.ir_state = IR_STATE_READY;
-    dccb.ir_type = IR_TYPE_AC;
-    dccb.source_code_length = TEST_BIN_SIZE;
-    memset(dccb.source_code, BINARY_SOURCE_SIZE_MAX, 0x00);
-    for (i = 0; i < dccb.source_code_length; i++)
+    //
+    //  Check if the EEPROM is write-protected.  If it is then unlock the EEPROM.
+    //
+    if (FLASH_IAPSR_DUL == 0)
     {
-        dccb.source_code[i] = ac_code[i];
+        FLASH_DUKR = 0xae;
+        FLASH_DUKR = 0x56;
     }
-
-    printf("decoding ac\n");
-
-    PrepareDecoding();
-
-    while(1)
+    //
+    //  Write the data to the EEPROM.
+    //
+    for (int index = 0; index < length; index++)
     {
-        ;
+        *destination++ = *data++;
     }
-#else
-    // Init GPIO
-    init_GPIO();
-    // Init UART
-    init_UART();
+    //
+    //  Now write protect the EEPROM.
+    //
+    FLASH_IAPSR_DUL = 0;
+}
 
-    // Init Timer
-    // init_Timer4();
 
-    while (1)
+//
+//  Setup the Rx buffers/counters ready to receive data.
+//
+void SetupRxBuffer()
+{
+    _currentRxByte = _rxBuffer;
+    _currentRxCount = 0;
+    _rxBufferLength = UART_RX_BUFFER_SIZE;
+    _uartMode = UART_MODE_WAITING_FOR_DATA;
+}
+
+//
+//  Transmit the IR pulse data.
+//
+void TransmitPulseData()
+{
+    _currentState = STATE_RUNNING;
+    _currentPulse = 0;
+    _pulseDataAddress = (char *) (EEPROM_PULSE_DATA + 1);
+    TIM2_ARRH = *_pulseDataAddress++;
+    TIM2_ARRL = *_pulseDataAddress++;
+    PD_ODR_ODR3 = *_pulseDataAddress++;
+    //
+    //  Now we have everything ready we need to force the Timer 2 counters to
+    //  reload and enable Timers 1 & 2.
+    //
+    TIM2_CR1_URS = 1;
+    TIM2_EGR_UG = 1;
+    TIM1_CR1_CEN = 1;
+    TIM2_CR1_CEN = 1;
+}
+
+//
+//  Process the data in the Rx buffer.
+//
+void ProcessUARTData()
+{
+    switch (_rxBuffer[1])
     {
-#if defined UART_DEFRAGMENT
-        start_uart_cd(UART_RECV_STOP);
-#endif
-        IRext_processUartMsg();
-    }
-#endif
-}
-
-void init_UART()
-{
-    UART3_DeInit();
-    UART3_Init((uint32_t)115200, UART3_WORDLENGTH_8D, UART3_STOPBITS_1, UART3_PARITY_NO,
-               UART3_MODE_TXRX_ENABLE);
-
-#if defined UART_INT
-    // enable UART3 RX interrupt
-    UART3_ITConfig(UART3_IT_RXNE_OR, ENABLE);
-#endif
-}
-
-/* initialization */
-void deinit_GPIO()
-{
-}
-
-
-void init_GPIO()
-{
-    GPIO_Init(IR_IO_PORT, (GPIO_Pin_TypeDef)(IR_PIN),  GPIO_MODE_OUT_PP_HIGH_FAST);
-}
-
-void init_Timer4()
-{
-    /* TIM4 configuration:
-     - TIM4CLK is set to 16 MHz, the TIM4 Prescaler is equal to 128 so the TIM1 counter
-     clock used is 16 MHz / 128 = 125 000 Hz
-    - With 125 000 Hz we can generate time base:
-        max time base is 2.048 ms if TIM4_PERIOD = 255 --> (255 + 1) / 125000 = 2.048 ms
-        min time base is 0.016 ms if TIM4_PERIOD = 1   --> (  1 + 1) / 125000 = 0.016 ms
-    - In this example we need to generate a time base equal to 1 ms
-     so TIM4_PERIOD = (0.001 * 125000 - 1) = 124 */
-
-    /* Time base configuration */
-    TIM4_TimeBaseInit(TIM4_PRESCALER_128, TIM4_PERIOD);
-    /* Clear TIM4 update flag */
-    TIM4_ClearFlag(TIM4_FLAG_UPDATE);
-    /* Enable update interrupt */
-    TIM4_ITConfig(TIM4_IT_UPDATE, ENABLE);
-}
-
-#if defined UART_DEFRAGMENT
-static void start_uart_cd(__IO uint32_t nTime)
-{
-    TIM4_Cmd(DISABLE);
-    uart_recv_stop_cd = nTime;
-    /* enable interrupts */
-    enableInterrupts();
-    /* Enable TIM4 */
-    TIM4_Cmd(ENABLE);
-}
-
-static void stop_uart_receive()
-{
-    // it seems there is no data from peer of uart, reset the receiving FSM
-    memset(receive_buffer, 1024, 0x00);
-    received = 0;
-    printf("UART receiving stopped\n");
-    TIM4_Cmd(DISABLE);
-}
-
-#endif
-
-void timer4_callback()
-{
-#if defined UART_DEFRAGMENT
-    if (uart_recv_stop_cd != 0)
-    {
-        uart_recv_stop_cd--;
-        return;
-    }
-    stop_uart_receive();
-#endif
-}
-
-/* UART TX/RX */
-PUTCHAR_PROTOTYPE
-{
-    UART3_SendData8(c);
-    while (UART3_GetFlagStatus(UART3_FLAG_TXE) == RESET);
-
-    return (c);
-}
-
-
-GETCHAR_PROTOTYPE
-{
-#ifdef _COSMIC_
-    char c = 0;
-#else
-    int c = 0;
-#endif
-    while (UART3_GetFlagStatus(UART3_FLAG_RXNE) == RESET);
-    c = UART3_ReceiveData8();
-    return (c);
-}
-
-
-/* handle UART commands */
-void IRext_uartFeedback()
-{
-    if (dccb.decoded_length > 0)
-    {
-        for (uint16_t index = 0; index < dccb.decoded_length; index++)
-        {
-            WriteBytes((uint8_t*)&dccb.ir_decoded[index], 2);
-        }
-    }
-}
-
-
-static void IRext_processUartMsg()
-{
-    uint8_t data_received = 0;
-
-    data_received = getchar();
-    switch(data_received)
-    {
-        case REQ_READY:
-            HandleBinReady();
+        case COMMAND_GET_ID:
             break;
-        case REQ_WRITE:
-            HandleBinWrite();
+        case COMMAND_SET_ID:
             break;
-        case REQ_CATEGORY:
-            HandleBinCategory();
+        case COMMAND_GET_CARRIER_FREQUENCY:
             break;
-        case REQ_COMMAND:
-            HandleCommand();
+        case COMMAND_SET_CARRIER_FREQUENCY:
+            break;
+        case COMMAND_GET_PULSE_DATA:
+            SendResponse(EEPROM_PULSE_DATA,  ((*EEPROM_PULSE_DATA) * 3) + 1);
+            break;
+        case COMMAND_SET_PULSE_DATA:
+            break;
+        case COMMAND_TRANSMIT_PULSE_DATA:
+            TransmitPulseData();
+            SendACK();
+            break;
         default:
+            SendNAK(EC_UNKNOWN_COMMAND);
             break;
     }
+    _uartMode = UART_MODE_WAITING_FOR_DATA;
 }
 
-
-static void HandleBinReady()
+//--------------------------------------------------------------------------------
+//
+//  Process the interrupt generated by the pressing of the button.
+//
+//  This ISR makes the assumption that we only have on incoming interrupt on Port D.
+//
+#pragma vector = 8
+__interrupt void EXTI_PORTD_IRQHandler(void)
 {
-    /*
-       Request for ready
-       +------+
-       | 0x50 |
-       +------+
-    */
-    dccb.decoded_length = 0;
-    memset(dccb.source_code, BINARY_SOURCE_SIZE_MAX, 0x00);
-    dccb.recv_index = 0;
-    dccb.source_code_length = 0;
-    putchar(RSP_READY);
-}
-
-
-static void HandleBinWrite()
-{
-    /*
-       Request for write IR binary
-       +-------------------------------------------------------------+
-       | 0x51 | exp_idx (1 byte) | exp_len (1 byte) | data (n bytes) |
-       +-------------------------------------------------------------+
-    */
-    uint8_t expected_index = 0;
-    uint8_t expected_length = 0;
-    uint16_t received = 0;
-
-    // receive bin block index
-    expected_index = getchar();
-    // prepare the offset for the next write
-    dccb.recv_index = expected_index << 4;
-
-    // receive expected length of next transfer
-    expected_length = getchar();
-
-    if (expected_length == 0 || expected_length > BLOCK_BYTES)
+    if (_currentState != STATE_RUNNING)
     {
-        // error occurred!
-        putchar(RSP_CMD_ERR);
+        TransmitPulseData();
+    }
+}
+
+//--------------------------------------------------------------------------------
+//
+//  Timer 2 Overflow handler.
+//
+#pragma vector = TIM2_OVR_UIF_vector
+__interrupt void TIM2_UPD_OVF_IRQHandler(void)
+{
+    _currentPulse++;
+    if (_currentPulse == _numberOfPulses)
+    {
+        //
+        //  We have processed the pulse data so stop now.
+        //
+        PD_ODR_ODR3 = 0;
+        TIM2_CR1_CEN = 0;
+        TIM1_CR1_CEN = 0;           //  Stop Timer 1.
+        _currentState = STATE_WAITING_FOR_USER;
     }
     else
     {
-        for(received = 0; received < expected_length; received++)
-        {
-            dccb.source_code[dccb.recv_index + received] = getchar();
-        }
-        dccb.source_code_length = dccb.recv_index + received;
-        putchar(RSP_INDEX_DONE);
+        TIM2_ARRH = *_pulseDataAddress++;
+        TIM2_ARRL = *_pulseDataAddress++;
+        PD_ODR_ODR3 = *_pulseDataAddress++;
+        TIM2_CR1_URS = 1;
+        TIM2_EGR_UG = 1;
     }
+    //
+    //  Reset the interrupt otherwise it will fire again straight away.
+    //
+    TIM2_SR1_UIF = 0;
 }
 
-
-static void HandleBinCategory()
+//--------------------------------------------------------------------------------
+//
+//  UART Transmit Buffer Empty handler.
+//
+#pragma vector = UARTPORT(T_TXE_vector)
+__interrupt void UART_T_TXE_IRQHandler(void)
 {
-    /*
-       Request for write category
-       +----------------------+
-       | 0x54 | cate (1 byte) |
-       +----------------------+
-    */
-    dccb.ir_type = (ir_type_t)getchar();
-    // bin transfer done
-    putchar(RSP_DONE);
-    PrepareDecoding();
-}
-
-
-static void HandleCommand()
-{
-    /*
-       Request for write category
-       +----------------------+
-       | 0x55 | cate (1 byte) |
-       +----------------------+
-    */
-    
-}
-
-
-static void ParseCommand(uint8_t* data, uint16_t len)
-{
-    uint8_t ir_type = 0;
-    uint8_t key_code = 0;
-    uint8_t ac_function = 0;
-
-    if (IR_STATE_OPENED != dccb.ir_state)
+    if (_currentTxCount < _txBufferLength)
     {
-        // feek back error state
-        WriteBytes("11", 2);
-        return;
-    }
-
-    ir_type = data[0];
-
-    if (IR_TYPE_TV == dccb.ir_type && 0x31 == ir_type)
-    {
-        // decode as TV
-        key_code = data[1] - 0x30;
-        dccb.decoded_length = ir_decode(key_code, dccb.ir_decoded, NULL, 0);
-    }
-    else if (IR_TYPE_AC == dccb.ir_type && 0x32 == ir_type)
-    {
-        ac_function = data[1] - 0x30;
-        dccb.decoded_length = ir_decode(ac_function, dccb.ir_decoded, &ac_status, 0);
-    }
-
-    if (dccb.decoded_length > 0)
-    {
-        IRext_uartFeedback();
+        UARTPORT(DR = *_currentTxByte++);
+        _currentTxCount++;
     }
     else
     {
+        UARTPORT(CR2_TIEN = 0);
     }
 }
 
-
-static void PrepareDecoding()
+//--------------------------------------------------------------------------------
+//
+//  UART Receive Buffer Not Empty handler.
+//
+#pragma vector = UARTPORT(R_RXNE_vector)
+__interrupt void UART_R_RXNE_IRQHandler(void)
 {
-    // parse IREXT binary automatically
-    if (IR_TYPE_TV == dccb.ir_type)
+    unsigned char dataByte = UARTPORT(DR);
+    if ((_uartMode == UART_MODE_WAITING_FOR_DATA) && (dataByte == 0xaa))
     {
-        if (IR_DECODE_SUCCEEDED ==
-            ir_binary_open(IR_CATEGORY_TV, 1, dccb.source_code, dccb.source_code_length))
-        {
-            dccb.ir_state = IR_STATE_OPENED;
-            putchar(RSP_IR_OPENED);
-        }
-        else
-        {
-            putchar(RSP_IR_FAILURE);
-        }
-    }
-    else if (IR_TYPE_AC == dccb.ir_type)
-    {
-        if (IR_DECODE_SUCCEEDED ==
-            ir_binary_open(IR_CATEGORY_AC, 1, dccb.source_code, dccb.source_code_length))
-        {
-            dccb.ir_state = IR_STATE_OPENED;
-            putchar(RSP_IR_OPENED);
-        }
-        else
-        {
-            putchar(RSP_IR_FAILURE);
-        }
+        SetupRxBuffer();
+        _uartMode = UART_MODE_RECEIVING_DATA;
     }
     else
     {
-        putchar(RSP_IR_FAILURE);
+        if (_uartMode == UART_MODE_RECEIVING_DATA)
+        {
+            if (_currentRxCount < (UART_RX_BUFFER_SIZE - 1))
+            {
+                *_currentRxByte++ = dataByte;
+                _currentRxCount++;
+                if (_currentRxCount > 1)
+                {
+                    if ((_rxBuffer[0] - 1) == _currentRxCount)
+                    {
+                        ProcessUARTData();
+                    }
+                }
+            }
+            else
+            {
+                //
+                //  If we get here we have filled the UART Rx buffer.
+                //  Not a lot we can do really so reset the system to
+                //  wait for a new command.
+                //
+                SendNAK(EC_RX_BUFFER_OVERFLOW);
+                _uartMode = UART_MODE_WAITING_FOR_DATA;
+            }
+        }
     }
 }
 
-
-static void TransportDataToUart(uint8_t* data, uint16_t len)
+//--------------------------------------------------------------------------------
+//
+//  Setup Timer 2 ready to process the pulse data.
+//
+void SetupTimer2()
 {
-    for (uint16_t i = 0; i < len; i++)
-    {
-        delay(10);
-        putchar(data[i]);
-    }
+    TIM2_PSCR = _prescalar;
+    TIM2_IER_UIE = 1;       //  Enable the update interrupts.
 }
 
-
-static void WriteBytes(uint8_t *data, uint16_t len)
+//--------------------------------------------------------------------------------
+//
+//  Now set up the ports.
+//
+//  PD3 - IR Pulse signal.
+//  PD4 - Input pin indicating that the user wishes to trigger the camera.
+//
+void SetupPorts()
 {
-    TransportDataToUart(data, len);
+    PD_ODR = 0;             //  All pins are turned off.
+    //
+    //  PD3 is the output for the IR control.
+    //
+    PD_DDR_DDR3 = 1;
+    PD_CR1_C13 = 1;
+    PD_CR2_C23 = 1;
+    //
+    //  Now configure the input pin.
+    //
+    PD_DDR_DDR4 = 0;        //  PD4 is input.
+    PD_CR1_C14 = 1;         //  PD4 is floating input.
+    PD_CR2_C24 = 1;
+    //
+    //  Set up the interrupt.
+    //
+    EXTI_CR1_PDIS = 1;      //  Interrupt on rising edge.
+    EXTI_CR2_TLIS = 1;      //  Rising edge only.
 }
 
-/* helper functions */
-#ifdef USE_FULL_ASSERT
-void assert_failed(uint8_t* file, uint32_t line)
+//--------------------------------------------------------------------------------
+//
+//  Set up Timer 1, channel 4 to output a PWM signal (the carrier signal).
+//
+void SetupTimer1()
 {
+    TIM1_ARRH = 0x00;       //  Reload counter = 51
+    TIM1_ARRL = 0x33;
+    TIM1_PSCRH = 0;         //  Prescalar = 0 (i.e. 1)
+    TIM1_PSCRL = 0;
+    //
+    //  Now configure Timer 1, channel 4.
+    //
+    TIM1_CCMR4_OC4M = 7;    //  Set up to use PWM mode 2.
+    TIM1_CCER2_CC4E = 1;    //  Output is enabled.
+    TIM1_CCER2_CC4P = 0;    //  Active is defined as high.
+    TIM1_CCR4H = 0x00;      //  26 = 50% duty cycle (based on TIM1_ARR).
+    TIM1_CCR4L = 0x1a;
+    TIM1_BKR_MOE = 1;       //  Enable the main output.
+}
+
+//--------------------------------------------------------------------------------
+//
+//  Setup the UART to run at 57600 baud, no parity, one stop bit, 8 data bits.
+//
+//  Important: This relies upon the system clock being set to run at 2 MHz.
+//
+void SetupUART()
+{
+    unsigned char tmp = UARTPORT(SR);
+    tmp = UARTPORT(DR);
+    //
+    //  Reset the UART registers to the reset values.
+    //
+    UARTPORT(CR1 = 0);
+    UARTPORT(CR2 = 0);
+    UARTPORT(CR4 = 0);
+    UARTPORT(CR3 = 0);
+    UARTPORT(GTR = 0);
+    UARTPORT(PSCR = 0);
+    //
+    //  Now setup the port to 57600,n,8,1.
+    //
+    UARTPORT(CR1_M = 0);        //  8 Data bits.
+    UARTPORT(CR1_PCEN = 0);     //  Disable parity.
+    UARTPORT(CR3_STOP = 0);     //  1 stop bit.
+    UARTPORT(BRR2 = 0x03);      //  Set the baud rate registers to 57600 baud
+    UARTPORT(BRR1 = 0x02);      //  based upon a 2 MHz system clock.
+    //
+    //  Disable the transmitter and receiver.
+    //
+    UARTPORT(CR2_TEN = 0);      //  Disable transmit.
+    UARTPORT(CR2_REN = 0);      //  Disable receive.
+    SetupRxBuffer();
+    //
+    //  Turn on the UART transmit, receive and the UART clock.
+    //
+    UARTPORT(CR2_TEN = 1);
+    UARTPORT(CR2_RIEN = 1);
+    UARTPORT(CR2_REN = 1);
+}
+
+//--------------------------------------------------------------------------------
+//
+//  Main program loop.
+//
+void main()
+{
+    __disable_interrupt();
+    _pulseDataAddress = (char *) EEPROM_PULSE_DATA;
+    _numberOfPulses = *_pulseDataAddress++;
+    SetupPorts();
+    SetupUART();
+    SetupTimer2();
+    SetupTimer1();
+    __enable_interrupt();
     while (1)
     {
-    }
-}
-#endif
-
-
-void delay(u16 count)
-{
-    u8 i, j;
-    while (count--)
-    {
-        for(i = 0; i < 50; i++)
-            for(j = 0; j < 20; j++);
+        __wait_for_interrupt();
     }
 }
 

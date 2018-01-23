@@ -2098,51 +2098,6 @@
         </settings>
     </configuration>
     <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_ac_apply.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_ac_binary_parse.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_ac_build_frame.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_ac_control.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_ac_parse_forbidden_info.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_ac_parse_frame_info.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_ac_parse_parameter.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_decode.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_tv_control.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\irext\src\ir_utils.c</name>
-    </file>
-    <file>
         <name>$PROJ_DIR$\src\main.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\lib\src\stm8s_clk.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\lib\src\stm8s_gpio.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\stm8s_it.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\lib\src\stm8s_tim4.c</name>
-    </file>
-    <file>
-        <name>$PROJ_DIR$\src\lib\src\stm8s_uart3.c</name>
     </file>
 </project>
