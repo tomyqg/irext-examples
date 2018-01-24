@@ -391,8 +391,10 @@ void SetupUART()
     UARTPORT(CR2 = 0);
     UARTPORT(CR4 = 0);
     UARTPORT(CR3 = 0);
+#if defined USE_UART1
     UARTPORT(GTR = 0);
     UARTPORT(PSCR = 0);
+#endif
     //
     //  Now setup the port to 57600,n,8,1.
     //
