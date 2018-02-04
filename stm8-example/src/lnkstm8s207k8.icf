@@ -23,7 +23,6 @@ define region FarFuncCode = [from 0x8000 to 0xFFFF]
 
 define region HugeFuncCode = [from 0x8000 to 0x17FFF];
 
-
 /////////////////////////////////////////////////////////////////
 
 define block CSTACK with size = _CSTACK_SIZE  {};
@@ -87,11 +86,11 @@ place in NearFuncCode           { ro section __DLIB_PERTHREAD_init,
                                   ro section .huge.data_init,
                                   ro section .huge_func.textrw_init,
                                   ro section .iar.init_table,
-                		  ro section .init_array,
+                                  ro section .init_array,
                                   ro section .near.data_init,
                                   ro section .near.rodata,
-				  ro section .near_func.text,
-				  ro section .near_func.textrw_init,
+                                  ro section .near_func.text,
+                                  ro section .near_func.textrw_init,
                                   ro section .tiny.data_init,
                                   ro section .tiny.rodata_init };
 
@@ -101,10 +100,10 @@ place in FarFuncCode            { ro section .far.rodata,
 place in HugeFuncCode           { ro section .huge.rodata,
                                   ro section .huge_func.text };
 
-place in Eeprom                 {    section .eeprom.noinit };
+place in Eeprom                 { section .eeprom.noinit };
 
-place in Eeprom                 {    section .eeprom.data };
+place in Eeprom                 { section .eeprom.data };
 
-place in Eeprom                 {    section .eeprom.rodata };
+place in Eeprom                 { section .eeprom.rodata };
 
 /////////////////////////////////////////////////////////////////

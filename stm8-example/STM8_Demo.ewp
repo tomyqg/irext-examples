@@ -26,7 +26,7 @@
                 <option>
                     <name>GenDataModel</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>GOutputBinary</name>
@@ -60,33 +60,33 @@
                 </option>
                 <option>
                     <name>GenRTConfigPath</name>
-                    <state>$TOOLKIT_DIR$\LIB\dlstm8smn.h</state>
+                    <state>$TOOLKIT_DIR$\LIB\dlstm8sln.h</state>
                 </option>
                 <option>
                     <name>GenLibInFormatter</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>6</state>
                 </option>
                 <option>
                     <name>GenLibInFormatterDescription</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>No specifier n, no float, no scan set, no assignment suppressing, without multibytes.</state>
                 </option>
                 <option>
                     <name>GenLibOutFormatter</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>7</state>
                 </option>
                 <option>
                     <name>GenLibOutFormatterDescription</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>No specifier a or A, no specifier n, no float, no flags.</state>
                 </option>
                 <option>
                     <name>GenStackSize</name>
-                    <state>0x300</state>
+                    <state>0x100</state>
                 </option>
                 <option>
                     <name>GenHeapSize</name>
-                    <state>0x7F</state>
+                    <state>0x140</state>
                 </option>
                 <option>
                     <name>GeneralEnableMisra</name>
@@ -113,11 +113,11 @@
                 <option>
                     <name>GenMathFunctionVariant</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GenMathFunctionDescription</name>
-                    <state>Default variants of cos, sin, tan, log, log10, pow, and exp.</state>
+                    <state>Smaller size, higher execution speed, less precision, smaller input range.</state>
                 </option>
             </data>
         </settings>
@@ -146,25 +146,25 @@
                 </option>
                 <option>
                     <name>IccOptLevel</name>
-                    <state>1</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>IccOptStrategy</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IccOptLevelSlave</name>
-                    <state>1</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>IccOptAllowList</name>
                     <version>0</version>
-                    <state>000000</state>
+                    <state>100100</state>
                 </option>
                 <option>
                     <name>IccGenerateDebugInfo</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IccOutputFile</name>
@@ -258,9 +258,9 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
-                    <state>D:\Project\Iot_Work\irext\examples\stm8-driver\src</state>
-                    <state>D:\Project\Iot_Work\irext\examples\stm8-driver\src\lib\inc</state>
-                    <state>D:\Project\Iot_Work\irext\examples\stm8-driver\src\irext\include</state>
+                    <state>D:\Project\Iot_Work\irext\examples\stm8-example\src</state>
+                    <state>D:\Project\Iot_Work\irext\examples\stm8-example\src\lib\inc</state>
+                    <state>D:\Project\Iot_Work\irext\examples\stm8-example\src\irext\include</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -323,7 +323,7 @@
                 </option>
                 <option>
                     <name>IccFloatSemantics</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
             </data>
         </settings>
@@ -357,7 +357,7 @@
                 </option>
                 <option>
                     <name>AsmDebugInfo</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>AsmListFile</name>
@@ -606,11 +606,11 @@
                 </option>
                 <option>
                     <name>IlinkIcfOverride</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>D:\Project\Iot_Work\irext\examples\stm8-driver\src\lnkstm8s207k8.icf</state>
+                    <state>$TOOLKIT_DIR$\config\lnkstm8s207k8.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
@@ -729,7 +729,7 @@
                 </option>
                 <option>
                     <name>IlinkCspyDebugSupportEnable</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkCspyBufferedWrite</name>

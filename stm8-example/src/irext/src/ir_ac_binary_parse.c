@@ -9,15 +9,18 @@ Revision log:
 * 2017-01-03: created by strawmanbobi
 **************************************************************************************/
 
-#include <stdlib.h>
-
 #include "../include/ir_ac_binary_parse.h"
 #include "../include/ir_decode.h"
 
 UINT16 tag_head_offset = 0;
 
 extern struct ir_bin_buffer *p_ir_buffer;
-extern struct tag_head *tags;
+
+#if defined USE_DYNAMIC_TAG
+extern struct tag_head* tags;
+#else
+extern struct tag_head tags[];
+#endif
 
 UINT8 tag_count = 0;
 const UINT16 tag_index[TAG_COUNT_FOR_PROTOCOL] =
@@ -40,11 +43,14 @@ INT8 binary_parse_offset()
 
     tag_head_offset = (UINT16) ((tag_count << 1) + 1);
 
+#if defined USE_DYNAMIC_TAG
     tags = (t_tag_head *) ir_malloc(tag_count * sizeof(t_tag_head));
+
     if (NULL == tags)
     {
         return IR_DECODE_FAILED;
     }
+#endif
 
     for (i = 0; i < tag_count; i++)
     {

@@ -22,7 +22,12 @@ Revision log:
 #include "../include/ir_utils.h"
 
 
+#if defined USE_DYNAMIC_TAG
 extern struct tag_head *tags;
+#else
+extern struct tag_head tags[];
+#endif
+
 extern UINT8 tag_count;
 
 static INT8 ir_context_init();
@@ -87,8 +92,8 @@ INT8 ir_ac_lib_parse()
                 context->si.type = SWING_TYPE_NORMAL;
                 context->si.mode_count = 2;
             }
-            break;
             context->si.dir_index = 0;
+            break;
         }
     }
 
@@ -360,11 +365,13 @@ INT8 ir_ac_lib_parse()
         }
     }
 
+#if defined USE_DYNAMIC_TAG
     if (NULL != tags)
     {
         ir_free(tags);
         tags = NULL;
     }
+#endif
 
     ir_hex_code = (UINT8 *) ir_malloc(context->default_code.len);
     if (NULL == ir_hex_code)

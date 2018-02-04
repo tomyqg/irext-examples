@@ -21,8 +21,12 @@ Revision log:
 
 struct ir_bin_buffer binary_file;
 struct ir_bin_buffer *p_ir_buffer = &binary_file;
-struct tag_head *tags;
 
+#if defined USE_DYNAMIC_TAG
+struct tag_head *tags;
+#else
+struct tag_head tags[TAG_COUNT_FOR_PROTOCOL];
+#endif
 
 UINT8 *ir_hex_code = NULL;
 UINT8 ir_hex_len = 0;
@@ -375,12 +379,15 @@ static UINT16 ir_ac_lib_control(t_remote_ac_status ac_status, UINT16 *user_data,
 
 static INT8 ir_ac_lib_close()
 {
+#if defined USE_DYNAMIC_TAG
     // free context
     if (NULL != tags)
     {
         ir_free(tags);
         tags = NULL;
     }
+#endif
+
     free_ac_context();
 
     return IR_DECODE_SUCCEEDED;

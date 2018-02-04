@@ -1,0 +1,8 @@
+;	STMicroelectronics dependencies file
+
+[Version]
+Keyword=ST7Project
+Number=1.3
+
+[Root.Source Files.irext\src\ir_ac_apply.c.Config.0]
+ExternDep=irext\src\ir_ac_apply.c 
